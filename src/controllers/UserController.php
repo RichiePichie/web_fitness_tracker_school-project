@@ -112,7 +112,6 @@ class UserController {
     
     // Odhlášení uživatele
     public function logout() {
-        session_start();
         session_unset();
         session_destroy();
         
@@ -226,7 +225,7 @@ class UserController {
         $userId = $_SESSION['user_id'];
         $user = $this->userModel->getById($userId);
         
-        include 'src/views/profile.php';
+        include __DIR__ . '/../views/profile.php';
     }
 }
 ?> 
