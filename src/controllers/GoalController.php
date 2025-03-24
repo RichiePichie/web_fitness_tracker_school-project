@@ -19,7 +19,7 @@ class GoalController {
         // Kontrola stavu cílů
         $this->goalModel->checkGoalStatus($userId);
         
-        include 'src/views/goals.php';
+        include __DIR__ . '/../views/goals.php';
     }
     
     // Zobrazení formuláře pro přidání cíle
@@ -29,7 +29,7 @@ class GoalController {
             exit;
         }
         
-        include 'src/views/add_goal.php';
+        include __DIR__ . '/../views/add_goal.php';
     }
     
     // Zpracování přidání cíle
@@ -131,7 +131,7 @@ class GoalController {
             exit;
         }
         
-        include 'src/views/edit_goal.php';
+        include __DIR__ . '/../views/edit_goal.php';
     }
     
     // Zpracování editace cíle

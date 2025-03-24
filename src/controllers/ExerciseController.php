@@ -16,7 +16,7 @@ class ExerciseController {
         $userId = $_SESSION['user_id'];
         $exercises = $this->exerciseModel->getAllByUser($userId);
         
-        include 'src/views/exercises.php';
+        include __DIR__ . '/../views/exercises.php';
     }
     
     // Zobrazení formuláře pro přidání cvičení
@@ -26,7 +26,7 @@ class ExerciseController {
             exit;
         }
         
-        include 'src/views/add_exercise.php';
+        include __DIR__ . '/../views/add_exercise.php';
     }
     
     // Zpracování přidání cvičení
@@ -117,7 +117,7 @@ class ExerciseController {
             exit;
         }
         
-        include 'src/views/edit_exercise.php';
+        include __DIR__ . '/../views/edit_exercise.php';
     }
     
     // Zpracování editace cvičení
@@ -234,7 +234,7 @@ class ExerciseController {
         $stats = $this->exerciseModel->getUserStats($userId);
         $recentExercises = $this->exerciseModel->getRecentByUser($userId, 30);
         
-        include 'src/views/exercise_stats.php';
+        include __DIR__ . '/../views/exercise_stats.php';
     }
 }
 ?> 
