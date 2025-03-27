@@ -9,22 +9,20 @@ class UserController {
     // Zpracování registrace uživatele
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = trim($_POST['username'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
             $passwordConfirm = $_POST['password_confirm'] ?? '';
             $firstName = trim($_POST['first_name'] ?? '');
             $lastName = trim($_POST['last_name'] ?? '');
+            $gender = $_POST['gender'] ?? '';
+            $terms = isset($_POST['terms']) ? true : false;
+            
+            // Debug - log the POST data
+            error_log("Register POST data: " . print_r($_POST, true));
             
             $errors = [];
             
             // Validace vstupu
-            if (empty($username)) {
-                $errors['username'] = 'Uživatelské jméno je povinné';
-            } elseif ($this->userModel->usernameExists($username)) {
-                $errors['username'] = 'Uživatelské jméno již existuje';
-            }
-            
             if (empty($email)) {
                 $errors['email'] = 'Email je povinný';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -43,8 +41,34 @@ class UserController {
                 $errors['password_confirm'] = 'Hesla se neshodují';
             }
             
+            if (empty($firstName)) {
+                $errors['first_name'] = 'Jméno je povinné';
+            }
+            
+            if (empty($lastName)) {
+                $errors['last_name'] = 'Příjmení je povinné';
+            }
+            
+            if (empty($gender)) {
+                $errors['gender'] = 'Pohlaví je povinné';
+            }
+            
+            if (!$terms) {
+                $errors['terms'] = 'Musíte souhlasit s podmínkami';
+            }
+            
             if (empty($errors)) {
-                $userId = $this->userModel->register($username, $email, $password, $firstName, $lastName);
+                // Generate username from first and last name
+                $username = strtolower($firstName . '.' . $lastName);
+                // Add a random number if needed to make unique
+                if ($this->userModel->usernameExists($username)) {
+                    $username = $username . rand(100, 999);
+                }
+                
+                // Debug - log the data being passed to the model
+                error_log("Attempting to register user: $username, $email, [password], $firstName, $lastName, $gender");
+                
+                $userId = $this->userModel->register($username, $email, $password, $firstName, $lastName, $gender);
                 
                 if ($userId) {
                     $_SESSION['user_id'] = $userId;
@@ -54,16 +78,19 @@ class UserController {
                     exit;
                 } else {
                     $errors['general'] = 'Nastala chyba při registraci, zkuste to znovu';
+                    // Debug - log the error
+                    error_log("Registration failed. Last error: " . implode(', ', $this->userModel->getLastError()));
                 }
             }
             
             // Pokud došlo k chybě, uložíme chyby a data do session
             $_SESSION['register_errors'] = $errors;
-            $_SESSION['register_data'] = [
-                'username' => $username,
+            $_SESSION['register_form_data'] = [
                 'email' => $email,
                 'first_name' => $firstName,
-                'last_name' => $lastName
+                'last_name' => $lastName,
+                'gender' => $gender,
+                'terms' => $terms
             ];
             
             header('Location: index.php?page=register');

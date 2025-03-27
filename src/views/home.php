@@ -4,7 +4,7 @@ include 'src/views/header.php';
 ?>
 
 <div class="hero">
-    <div class="hero-content">
+    <div class="hero-content glass-container">
         <h2>Vítejte ve Fitness Tracker</h2>
         <p>Sledujte své cvičení, nastavujte si cíle a sledujte svůj pokrok!</p>
         
@@ -161,7 +161,7 @@ include 'src/views/header.php';
     <div class="cta-content">
         <h2>Začněte sledovat své fitness cíle ještě dnes</h2>
         <p>Registrujte se zdarma a získejte přístup ke všem funkcím aplikace Fitness Tracker</p>
-        <a href="index.php?page=register" class="btn primary-btn">
+        <a href="index.php?page=register" class="btn">
             <i class="fas fa-rocket btn-icon"></i>
             Začít zdarma
         </a>

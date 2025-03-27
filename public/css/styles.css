@@ -1,5 +1,6 @@
 /* Modern UI Design - Inspired by UIverse elements */
 :root {
+    /* Colors */
     --primary-color: #4f46e5;
     --primary-hover: #4338ca;
     --secondary-color: #f472b6;
@@ -14,9 +15,22 @@
     --border-color: #e2e8f0;
     --card-bg: #ffffff;
     --body-bg: #f1f5f9;
+    
+    /* RGB Values for opacity */
+    --primary-rgb: 79, 70, 229;
+    --secondary-rgb: 244, 114, 182;
+    --success-rgb: 16, 185, 129;
+    --danger-rgb: 239, 68, 68;
+    --warning-rgb: 245, 158, 11;
+    --dark-rgb: 30, 41, 59;
+    --light-rgb: 248, 250, 252;
+    
+    /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Other variables */
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     --border-radius-sm: 0.375rem;
     --border-radius: 0.5rem;
@@ -38,6 +52,23 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+    background-image: radial-gradient(
+        rgba(var(--primary-rgb), 0.08) 1px,
+        transparent 1px
+    );
+    background-size: 20px 20px;
+    background-position: 0 0;
+}
+
+[data-theme="dark"] body {
+    background-image: radial-gradient(
+        rgba(var(--primary-rgb), 0.15) 1px,
+        transparent 1px
+    );
+    background-size: 20px 20px;
+    background-position: 0 0;
 }
 
 .container {
@@ -251,20 +282,42 @@ h3 {
     margin-right: 0.5rem;
 }
 
-/* UIverse Card styles */
+/* UIverse-inspired Card styles */
 .card {
     background-color: var(--card-bg);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
-    transition: var(--transition);
-    overflow: hidden;
     padding: 1.5rem;
+    margin-bottom: 1.5rem;
     position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(var(--light-rgb), 0.1);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-rgb), 0.8), 
+        rgba(var(--secondary-rgb), 0.8)
+    );
+    transition: transform 0.3s ease;
+    transform: scaleX(0);
+    transform-origin: left;
 }
 
 .card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
+}
+
+.card:hover::before {
+    transform: scaleX(1);
 }
 
 .card-header {
@@ -278,6 +331,131 @@ h3 {
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0;
+}
+
+/* UIverse-inspired Button hover effects */
+.btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+    z-index: 1;
+}
+
+.btn:hover::before {
+    transform: translateX(100%);
+}
+
+.btn > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* UIverse-inspired Input focus effect */
+.input-focus-effect {
+    position: relative;
+}
+
+.input-focus-effect::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-rgb), 1), 
+        rgba(var(--secondary-rgb), 1)
+    );
+    transition: width 0.3s ease;
+}
+
+.input-focus-effect:focus-within::after {
+    width: 100%;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-wrapper i:first-child {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.input-icon-wrapper input {
+    padding-left: 3rem;
+}
+
+.input-icon-wrapper input:focus + i {
+    color: var(--primary-color);
+}
+
+.input-icon-wrapper .password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    max-height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.input-icon-wrapper .password-toggle:hover {
+    color: var(--primary-color);
+}
+
+.input-icon-wrapper input:focus ~ .password-toggle {
+    color: var(--primary-color);
+}
+
+.input-icon-wrapper .input-focus-effect::after {
+    bottom: -1px;
+}
+
+/* Add glass effect to form elements */
+.glass-input {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(var(--primary-rgb), 0.5);
+    box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.2);
+}
+
+[data-theme="dark"] .glass-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .glass-input:focus {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(var(--primary-rgb), 0.5);
 }
 
 /* UIverse Form styles */
@@ -775,46 +953,44 @@ input::placeholder, textarea::placeholder {
 
 /* Footer */
 footer {
-    background-color: var(--dark-color);
-    color: white;
-    padding: 2rem 0;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0 1rem 0;
     margin-top: auto;
 }
 
 .footer-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
     margin-bottom: 1.5rem;
 }
 
 .footer-logo {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 0.5rem;
 }
 
 .footer-logo i {
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 .footer-logo p {
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
 }
 
 .footer-links {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: center;
+    gap: 1.5rem;
 }
 
 .footer-links a {
-    color: var(--text-muted);
-    transition: var(--transition);
+    color: var(--text-color);
 }
 
 .footer-links a:hover {
@@ -824,32 +1000,87 @@ footer {
 .footer-social {
     display: flex;
     gap: 1rem;
-    justify-content: center;
 }
 
-.footer-social a {
-    display: flex;
+/* UIverse-inspired social buttons */
+.social-btn {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    transition: var(--transition);
+    background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.2));
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+    overflow: hidden;
+    position: relative;
 }
 
-.footer-social a:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-5px);
+.social-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, 
+        rgba(var(--primary-rgb), 0.5), 
+        rgba(var(--secondary-rgb), 0.5)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.social-btn i {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -10px rgba(var(--primary-rgb), 0.5);
+}
+
+.social-btn:hover::before {
+    opacity: 1;
+}
+
+.social-btn:hover i {
+    color: white;
+    transform: scale(1.2);
 }
 
 .footer-bottom {
     text-align: center;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 0.875rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
     color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.theme-info {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.light-label {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.dark-label {
+    color: #6366f1;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .light-label {
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .dark-label {
+    color: #818cf8;
 }
 
 /* Responsive */
@@ -994,10 +1225,15 @@ footer {
     color: var(--text-muted);
     cursor: pointer;
     transition: var(--transition);
-    padding: 0.25rem;
+    padding: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
+    max-height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
 }
 
 .input-icon-wrapper .password-toggle:hover {
@@ -1006,6 +1242,10 @@ footer {
 
 .input-icon-wrapper input:focus ~ .password-toggle {
     color: var(--primary-color);
+}
+
+.input-icon-wrapper .input-focus-effect::after {
+    bottom: -1px;
 }
 
 /* Hero Shapes */
@@ -1334,4 +1574,199 @@ footer {
 
 .checkbox-label .link:hover {
     color: var(--primary-hover);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    /* Colors */
+    --primary-color: #6366f1;
+    --primary-hover: #818cf8;
+    --secondary-color: #ec4899;
+    --secondary-hover: #f472b6;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --dark-color: #f8fafc;
+    --light-color: #1e293b;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --card-bg: #1e293b;
+    --body-bg: #0f172a;
+    
+    /* RGB Values for opacity */
+    --primary-rgb: 99, 102, 241;
+    --secondary-rgb: 236, 72, 153;
+    --success-rgb: 16, 185, 129;
+    --danger-rgb: 239, 68, 68;
+    --warning-rgb: 245, 158, 11;
+    --dark-rgb: 248, 250, 252;
+    --light-rgb: 30, 41, 59;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode transitions */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea, .checkbox-label::before {
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* UIverse-inspired Dark Mode Toggle */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.theme-toggle {
+    background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.05), rgba(var(--primary-rgb), 0.1));
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+    cursor: pointer;
+    position: relative;
+    height: 40px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-color);
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: hidden;
+}
+
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    transform: scale(0);
+    background: linear-gradient(45deg, 
+        rgba(var(--primary-rgb), 0.2), 
+        rgba(var(--secondary-rgb), 0.2)
+    );
+    z-index: 0;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover::before {
+    transform: scale(1);
+}
+
+.theme-toggle i, .theme-toggle-text {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-theme="dark"] .theme-toggle i.fa-sun {
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    animation: rotate 0.5s ease;
+}
+
+[data-theme="light"] .theme-toggle i.fa-moon {
+    color: #6366f1;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    animation: rotate 0.5s ease;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px -5px rgba(var(--primary-rgb), 0.4);
+}
+
+@media (max-width: 768px) {
+    .theme-toggle-text {
+        display: none;
+    }
+    
+    .theme-toggle {
+        width: 40px;
+        justify-content: center;
+        padding: 0;
+    }
+}
+
+/* Logout Button Styles */
+.logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    position: relative;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.logout-btn::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--danger-color);
+    transition: var(--transition);
+}
+
+.logout-btn:hover {
+    color: var(--danger-color);
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.logout-btn:hover::after {
+    width: 70%;
+    left: 15%;
+}
+
+/* Enhanced Glass Effect */
+.glass-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="dark"] .glass-container {
+    background: rgba(15, 23, 42, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glass-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px 0 rgba(31, 38, 135, 0.3);
+}
+
+[data-theme="dark"] .glass-container:hover {
+    box-shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.5);
+}
+
+@keyframes rotate {
+    from { transform: rotate(-45deg); opacity: 0; }
+    to { transform: rotate(0); opacity: 1; }
 } 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,9 +16,16 @@
                 <h1>Fitness Tracker</h1>
             </div>
             
-            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                    <span class="theme-toggle-text">Tmavý režim</span>
+                </button>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
             
             <nav id="main-nav">
                 <ul>
@@ -39,9 +46,13 @@
                         <li><a href="index.php?page=profile" <?php echo isset($_GET['page']) && $_GET['page'] === 'profile' ? 'class="active"' : ''; ?>>
                             <i class="fas fa-user"></i> Profil
                         </a></li>
-                        <li><a href="index.php?action=logout">
-                            <i class="fas fa-sign-out-alt"></i> Odhlásit se
-                        </a></li>
+                        <li>
+                            <form action="index.php?action=logout" method="post" class="logout-form">
+                                <button type="submit" class="logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i> Odhlásit se
+                                </button>
+                            </form>
+                        </li>
                     <?php else: ?>
                         <li><a href="index.php?page=login" <?php echo isset($_GET['page']) && $_GET['page'] === 'login' ? 'class="active"' : ''; ?>>
                             <i class="fas fa-sign-in-alt"></i> Přihlásit se

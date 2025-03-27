@@ -14,13 +14,14 @@
                     <a href="index.php?page=register">Registrace</a>
                 </div>
                 <div class="footer-social">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-btn" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; <?php echo date('Y'); ?> Fitness Tracker. Všechna práva vyhrazena.</p>
+                <p class="theme-info">Přepněte mezi <span class="light-label">světlým</span> a <span class="dark-label">tmavým</span> režimem kliknutím na ikonu v horní části stránky.</p>
             </div>
         </div>
     </footer>
@@ -37,6 +38,49 @@
                     mainNav.classList.toggle('active');
                     this.querySelector('i').classList.toggle('fa-bars');
                     this.querySelector('i').classList.toggle('fa-times');
+                });
+            }
+            
+            // Dark mode toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            const toggleText = document.querySelector('.theme-toggle-text');
+            
+            // Check for saved theme preference or use system preference
+            const savedTheme = localStorage.getItem('theme') || 
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            // Apply saved theme
+            applyTheme(savedTheme);
+            
+            function applyTheme(theme) {
+                htmlElement.setAttribute('data-theme', theme);
+                
+                // Update icon and text
+                if (themeToggle) {
+                    if (theme === 'dark') {
+                        themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+                        if (toggleText) {
+                            toggleText.textContent = 'Světlý režim';
+                        }
+                    } else {
+                        themeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
+                        if (toggleText) {
+                            toggleText.textContent = 'Tmavý režim';
+                        }
+                    }
+                }
+                
+                localStorage.setItem('theme', theme);
+            }
+            
+            // Toggle theme on button click
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = htmlElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    
+                    applyTheme(newTheme);
                 });
             }
         });

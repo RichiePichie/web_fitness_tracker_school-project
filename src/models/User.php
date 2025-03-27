@@ -1,17 +1,18 @@
 <?php
 class User {
     private $pdo;
+    private $lastError = [];
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
     }
 
     // Registrace nového uživatele
-    public function register($username, $email, $password, $firstName, $lastName) {
+    public function register($username, $email, $password, $firstName, $lastName, $gender = null) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        $sql = "INSERT INTO users (username, email, password, first_name, last_name) 
-                VALUES (:username, :email, :password, :firstName, :lastName)";
+        $sql = "INSERT INTO users (username, email, password, first_name, last_name, gender) 
+                VALUES (:username, :email, :password, :firstName, :lastName, :gender)";
         
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -20,10 +21,13 @@ class User {
                 ':email' => $email,
                 ':password' => $hashedPassword,
                 ':firstName' => $firstName,
-                ':lastName' => $lastName
+                ':lastName' => $lastName,
+                ':gender' => $gender
             ]);
             return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
+            $this->lastError[] = $e->getMessage();
+            error_log("Registration error: " . $e->getMessage());
             return false;
         }
     }
@@ -100,6 +104,11 @@ class User {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':email' => $email]);
         return $stmt->fetchColumn() > 0;
+    }
+
+    // Get last error
+    public function getLastError() {
+        return $this->lastError;
     }
 }
 ?> 

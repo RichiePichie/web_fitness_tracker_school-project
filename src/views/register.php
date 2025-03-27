@@ -137,6 +137,14 @@ unset($_SESSION['register_form_data']);
             </button>
         </div>
         
+        <!-- Debug information -->
+        <?php if (isset($errors) && !empty($errors)): ?>
+            <div class="alert alert-info">
+                <h4>Debug information:</h4>
+                <pre><?php print_r($errors); ?></pre>
+            </div>
+        <?php endif; ?>
+        
         <div class="form-footer">
             <p>Již máte účet? <a href="index.php?page=login">Přihlaste se</a></p>
         </div>
@@ -146,7 +154,8 @@ unset($_SESSION['register_form_data']);
 <script>
     function togglePasswordVisibility(fieldId) {
         const passwordInput = document.getElementById(fieldId);
-        const icon = document.querySelector(`#${fieldId} ~ .password-toggle i`);
+        const passwordWrapper = passwordInput.closest('.input-icon-wrapper');
+        const icon = passwordWrapper.querySelector('.password-toggle i');
         
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';

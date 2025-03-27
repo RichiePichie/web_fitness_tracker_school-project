@@ -14,6 +14,9 @@ unset($_SESSION['login_email']);
 <div class="auth-form">
     <div class="card-header">
         <h3 class="card-title">Přihlášení</h3>
+        <div class="auth-icon">
+            <i class="fas fa-sign-in-alt"></i>
+        </div>
     </div>
     
     <form action="index.php?action=login" method="post">
@@ -55,8 +58,15 @@ unset($_SESSION['login_email']);
             <?php endif; ?>
         </div>
         
+        <div class="form-group checkbox-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember" class="checkbox-label">Zapamatovat si mě</label>
+            </div>
+        </div>
+        
         <div class="form-actions">
-            <button type="submit" class="btn primary-btn">
+            <button type="submit" class="btn primary-btn btn-block">
                 <i class="fas fa-sign-in-alt btn-icon"></i>
                 Přihlásit se
             </button>
@@ -71,7 +81,8 @@ unset($_SESSION['login_email']);
 <script>
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('password');
-        const icon = document.querySelector('.password-toggle i');
+        const passwordWrapper = passwordInput.closest('.input-icon-wrapper');
+        const icon = passwordWrapper.querySelector('.password-toggle i');
         
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
