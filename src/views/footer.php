@@ -21,7 +21,6 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; <?php echo date('Y'); ?> Fitness Tracker. Všechna práva vyhrazena.</p>
-                <p class="theme-info">Přepněte mezi <span class="light-label">světlým</span> a <span class="dark-label">tmavým</span> režimem kliknutím na ikonu v horní části stránky.</p>
             </div>
         </div>
     </footer>
