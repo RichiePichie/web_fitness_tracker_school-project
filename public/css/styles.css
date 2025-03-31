@@ -383,80 +383,209 @@ h3 {
 /* Input with icons */
 .input-icon-wrapper {
     position: relative;
+}
+
+.avatar-character {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 30px;
+    background-color: #64c4e9;
+    border-radius: 50%;
+    position: relative;
+    border: 3px solid #e6f7fc;
+    box-shadow: 0 4px 12px rgba(100, 196, 233, 0.2);
     display: flex;
-    align-items: center;
-}
-
-.input-icon-wrapper i:first-child {
-    position: absolute;
-    left: 1rem;
-    color: var(--text-muted);
-    font-size: 1rem;
-    pointer-events: none;
-    transition: var(--transition);
-}
-
-.input-icon-wrapper input {
-    padding-left: 3rem;
-}
-
-.input-icon-wrapper input:focus + i {
-    color: var(--primary-color);
-}
-
-.input-icon-wrapper .password-toggle {
-    position: absolute;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    height: 100%;
-    max-height: 40px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-}
-
-.input-icon-wrapper .password-toggle:hover {
-    color: var(--primary-color);
-}
-
-.input-icon-wrapper input:focus ~ .password-toggle {
-    color: var(--primary-color);
-}
-
-.input-icon-wrapper .input-focus-effect::after {
-    bottom: -1px;
-}
-
-/* Add glass effect to form elements */
-.glass-input {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    align-items: center;
     transition: all 0.3s ease;
 }
 
-.glass-input:focus {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(var(--primary-rgb), 0.5);
-    box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.2);
+.avatar-face {
+    width: 70px;
+    height: 70px;
+    position: relative;
 }
 
-[data-theme="dark"] .glass-input {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.avatar-eye {
+    position: absolute;
+    width: 10px;
+    height: 14px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    top: 25px;
+    transition: all 0.2s ease;
 }
 
-[data-theme="dark"] .glass-input:focus {
-    background: rgba(0, 0, 0, 0.25);
-    border-color: rgba(var(--primary-rgb), 0.5);
+.avatar-eye.left {
+    left: 20px;
+}
+
+.avatar-eye.right {
+    right: 20px;
+}
+
+.avatar-mouth {
+    position: absolute;
+    width: 24px;
+    height: 5px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.2s ease;
+}
+
+/* Animation states */
+.avatar-character.watching .avatar-eye {
+    width: 12px;
+    height: 16px;
+}
+
+.avatar-character.blinking .avatar-eye {
+    height: 2px;
+}
+
+.avatar-character.surprised .avatar-eye {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+}
+
+.avatar-character.surprised .avatar-mouth {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    bottom: 10px;
+}
+
+/* Character reacts to typing */
+.avatar-character.character-react {
+    animation: character-bounce 0.15s ease-in-out;
+}
+
+@keyframes character-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.avatar-character.character-react .avatar-mouth {
+    animation: mouth-react 0.15s ease-in-out;
+}
+
+@keyframes mouth-react {
+    0%, 100% { height: 5px; }
+    50% { height: 8px; }
+}
+
+/* Different states for different input types */
+.avatar-character.email-mode .avatar-eye {
+    width: 12px;
+    height: 15px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+.avatar-character.email-mode .avatar-mouth {
+    width: 20px;
+    height: 10px;
+    border-radius: 0 0 10px 10px;
+}
+
+.avatar-character.text-mode .avatar-eye {
+    width: 11px;
+    height: 14px;
+    border-radius: 45%;
+}
+
+.avatar-character.text-mode .avatar-mouth {
+    width: 25px;
+    height: 7px;
+    border-radius: 7px;
+}
+
+.avatar-character.password-mode .avatar-eye {
+    width: 12px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.avatar-character.password-mode .avatar-mouth {
+    width: 22px;
+    height: 5px;
+}
+
+/* Add hair to the avatar to match the image */
+.avatar-character::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 24px;
+    background-color: #ffffff;
+    border-radius: 50% 50% 0 0;
+    z-index: 1;
+    clip-path: polygon(
+        0% 100%, 
+        15% 60%, 
+        30% 90%, 
+        45% 60%, 
+        60% 90%, 
+        75% 60%, 
+        90% 90%, 
+        100% 100%
+    );
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .avatar-character {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    .avatar-face {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .avatar-eye {
+        width: 8px;
+        height: 12px;
+        top: 22px;
+    }
+    
+    .avatar-eye.left {
+        left: 15px;
+    }
+    
+    .avatar-eye.right {
+        right: 15px;
+    }
+    
+    .avatar-mouth {
+        width: 20px;
+        height: 4px;
+        bottom: 12px;
+    }
+    
+    .avatar-character::before {
+        width: 55px;
+        height: 18px;
+    }
+}
+
+/* Form adjustments to accommodate the avatar */
+.auth-form {
+    padding-top: 20px;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .avatar-character {
+    background-color: #4fa8c9;
+    border-color: #1e3a47;
 }
 
 /* UIverse Form styles */
@@ -1672,4 +1801,133 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
 
 .checkbox-label .link:hover {
     color: var(--primary-hover);
+}
+
+/* Character reacts to typing */
+.avatar-character.character-react {
+    animation: character-bounce 0.15s ease-in-out;
+}
+
+@keyframes character-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.avatar-character.character-react .avatar-mouth {
+    animation: mouth-react 0.15s ease-in-out;
+}
+
+@keyframes mouth-react {
+    0%, 100% { height: 5px; }
+    50% { height: 8px; }
+}
+
+/* Different states for different input types */
+.avatar-character.email-mode .avatar-eye {
+    width: 12px;
+    height: 15px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+.avatar-character.email-mode .avatar-mouth {
+    width: 20px;
+    height: 10px;
+    border-radius: 0 0 10px 10px;
+}
+
+.avatar-character.text-mode .avatar-eye {
+    width: 11px;
+    height: 14px;
+    border-radius: 45%;
+}
+
+.avatar-character.text-mode .avatar-mouth {
+    width: 25px;
+    height: 7px;
+    border-radius: 7px;
+}
+
+.avatar-character.password-mode .avatar-eye {
+    width: 12px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.avatar-character.password-mode .avatar-mouth {
+    width: 22px;
+    height: 5px;
+}
+
+/* Add hair to the avatar to match the image */
+.avatar-character::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 24px;
+    background-color: #ffffff;
+    border-radius: 50% 50% 0 0;
+    z-index: 1;
+    clip-path: polygon(
+        0% 100%, 
+        15% 60%, 
+        30% 90%, 
+        45% 60%, 
+        60% 90%, 
+        75% 60%, 
+        90% 90%, 
+        100% 100%
+    );
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .avatar-character {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    .avatar-face {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .avatar-eye {
+        width: 8px;
+        height: 12px;
+        top: 22px;
+    }
+    
+    .avatar-eye.left {
+        left: 15px;
+    }
+    
+    .avatar-eye.right {
+        right: 15px;
+    }
+    
+    .avatar-mouth {
+        width: 20px;
+        height: 4px;
+        bottom: 12px;
+    }
+    
+    .avatar-character::before {
+        width: 55px;
+        height: 18px;
+    }
+}
+
+/* Form adjustments to accommodate the avatar */
+.auth-form {
+    padding-top: 20px;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .avatar-character {
+    background-color: #4fa8c9;
+    border-color: #1e3a47;
 } 

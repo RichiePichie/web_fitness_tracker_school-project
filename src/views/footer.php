@@ -27,6 +27,7 @@
     </footer>
     
     <script src="public/js/scripts.js"></script>
+    <script src="public/js/character-password.js"></script>
     <script>
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
