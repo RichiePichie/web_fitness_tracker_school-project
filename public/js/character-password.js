@@ -30,6 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
         mouth.className = 'avatar-mouth';
         characterFace.appendChild(mouth);
         
+        // Create smile line (for more expressive mouth)
+        const smileLine = document.createElement('div');
+        smileLine.className = 'avatar-smile-line';
+        characterFace.appendChild(smileLine);
+        
         // Insert the character at the beginning of the form, before the first element
         form.insertBefore(characterContainer, form.firstChild);
         
@@ -132,10 +137,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 characterContainer.classList.remove('email-mode', 'password-mode', 'text-mode');
                 if (this.type === 'email') {
                     characterContainer.classList.add('email-mode');
+                    smileLine.style.opacity = '1';
+                    smileLine.style.height = '15px';
+                    smileLine.style.bottom = '10px';
                 } else if (this.type === 'password') {
                     characterContainer.classList.add('password-mode');
+                    smileLine.style.opacity = '0';
                 } else {
                     characterContainer.classList.add('text-mode');
+                    smileLine.style.opacity = '0.8';
+                    smileLine.style.height = '10px';
+                    smileLine.style.bottom = '15px';
                 }
             });
             
@@ -151,6 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Reset eyes position
                     leftEye.style.transform = 'translate(0, 0)';
                     rightEye.style.transform = 'translate(0, 0)';
+                    
+                    // Reset smile
+                    smileLine.style.opacity = '0';
                 }
             });
             
@@ -170,6 +185,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     const inputLength = this.value.length;
                     const mouthWidth = Math.min(24 + (inputLength * 1.5), 40);
                     mouth.style.width = `${mouthWidth}px`;
+                    
+                    // Update mouth shape based on input length
+                    if (inputLength > 10) {
+                        mouth.style.height = '8px';
+                        mouth.style.borderRadius = '5px 5px 10px 10px';
+                    } else if (inputLength > 5) {
+                        mouth.style.height = '6px';
+                        mouth.style.borderRadius = '5px 5px 8px 8px';
+                    } else {
+                        mouth.style.height = '5px';
+                        mouth.style.borderRadius = '5px';
+                    }
+                    
+                    // Update smile line for when typing
+                    if (this.type === 'email') {
+                        const smileHeight = Math.min(15 + (inputLength * 0.5), 25);
+                        smileLine.style.height = `${smileHeight}px`;
+                    } else if (this.type === 'text') {
+                        const smileHeight = Math.min(10 + (inputLength * 0.4), 20);
+                        smileLine.style.height = `${smileHeight}px`;
+                    }
                 }
             });
             
@@ -193,8 +229,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (passwordField && passwordField.type === 'text') {
                     // Character looks shocked when password is visible
                     characterContainer.classList.add('surprised');
+                    
+                    // Change mouth to "O" shape for surprise
+                    mouth.style.width = '16px';
+                    mouth.style.height = '16px';
+                    mouth.style.borderRadius = '50%';
+                    
                     setTimeout(() => {
                         characterContainer.classList.remove('surprised');
+                        
+                        // Reset mouth based on active field type
+                        if (activeInput) {
+                            if (activeInput.type === 'password' || activeInput.type === 'text') {
+                                const inputLength = activeInput.value.length;
+                                const mouthWidth = Math.min(24 + (inputLength * 1.5), 40);
+                                mouth.style.width = `${mouthWidth}px`;
+                                mouth.style.height = '5px';
+                                mouth.style.borderRadius = '5px';
+                            }
+                        }
                     }, 1000);
                 } else {
                     characterContainer.classList.remove('surprised');
