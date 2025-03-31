@@ -46,9 +46,8 @@
             const htmlElement = document.documentElement;
             const toggleText = document.querySelector('.theme-toggle-text');
             
-            // Check for saved theme preference or use system preference
-            const savedTheme = localStorage.getItem('theme') || 
-                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            // Check for saved theme preference or default to light
+            const savedTheme = localStorage.getItem('theme') || 'light';
             
             // Apply saved theme
             applyTheme(savedTheme);
