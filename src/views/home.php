@@ -14,7 +14,7 @@ include 'src/views/header.php';
                     <i class="fas fa-user-plus btn-icon"></i>
                     Registrovat se
                 </a>
-                <a href="index.php?page=login" class="btn secondary-btn">
+                <a href="index.php?page=login" class="btn primary-btn">
                     <i class="fas fa-sign-in-alt btn-icon"></i>
                     Přihlásit se
                 </a>

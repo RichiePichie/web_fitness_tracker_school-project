@@ -13,14 +13,14 @@ CREATE TABLE IF NOT EXISTS users (
     height DECIMAL(5,2) DEFAULT NULL,
     weight DECIMAL(5,2) DEFAULT NULL,
     date_of_birth DATE DEFAULT NULL,
-    profile_image VARCHAR(255) DEFAULT NULL,
+    profile_image BLOB DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabulka cvičení
 CREATE TABLE IF NOT EXISTS exercises (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT NOT NULL,
     user_id INT NOT NULL,
     title VARCHAR(100) NOT NULL,
     description TEXT,
@@ -31,27 +31,29 @@ CREATE TABLE IF NOT EXISTS exercises (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    PRIMARY KEY (id, user_id) 
 );
 
 -- Tabulka cílů
 CREATE TABLE IF NOT EXISTS goals (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT NOT NULL,
     user_id INT NOT NULL,
     title VARCHAR(100) NOT NULL,
     description TEXT,
     goal_type ENUM('weight', 'exercise_frequency', 'duration', 'distance', 'other') NOT NULL,
-    target_value DECIMAL(10,2) NOT NULL,
-    current_value DECIMAL(10,2) DEFAULT 0,
+    target_value DECIMAL(5,2) NOT NULL,
+    current_value DECIMAL(5,2) DEFAULT 0,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     status ENUM('active', 'completed', 'failed', 'cancelled') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    PRIMARY KEY (id, user_id) 
 );
 
 -- Přidání testovacích dat
-INSERT INTO users (username, email, password, first_name, last_name, height, weight, date_of_birth) VALUES
+/*INSERT INTO users (username, email, password, first_name, last_name, height, weight, date_of_birth) VALUES
 ('test_user', 'test@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Test', 'User', 180.00, 75.00, NULL),
 ('admin', 'admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', 'User', 175.00, 70.00, NULL),
 ('john_doe', 'john.doe@example.com', '$2y$10$hashed_password', 'John', 'Doe', 180.00, 75.00, '1990-01-15'),

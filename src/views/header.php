@@ -11,10 +11,10 @@
 <body>
     <header>
         <div class="container">
-            <div class="logo">
+            <a href="index.php" class="logo">
                 <i class="fas fa-heartbeat" style="font-size: 1.5rem; margin-right: 0.75rem; color: var(--primary-color);"></i>
                 <h1>Fitness Tracker</h1>
-            </div>
+            </a>
             
             <div class="header-controls">
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
@@ -28,11 +28,7 @@
             </div>
             
             <nav id="main-nav">
-                <ul>
-                    <li><a href="index.php" <?php echo !isset($_GET['page']) || $_GET['page'] === 'home' ? 'class="active"' : ''; ?>>
-                        <i class="fas fa-home"></i> Domů
-                    </a></li>
-                    
+                <ul>                    
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <li><a href="index.php?page=dashboard" <?php echo isset($_GET['page']) && $_GET['page'] === 'dashboard' ? 'class="active"' : ''; ?>>
                             <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -68,6 +64,6 @@
     
     <main>
         <div class="container">
-            <?php if (isset($pageTitle) && (!isset($_GET['page']) || $_GET['page'] !== 'home')): ?>
+            <?php /*if (isset($pageTitle) && (!isset($_GET['page']) || $_GET['page'] !== 'home')): ?>
                 <h2><?php echo $pageTitle; ?></h2>
-            <?php endif; ?> 
+            <?php endif; */?>

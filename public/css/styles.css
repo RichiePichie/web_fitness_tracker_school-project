@@ -170,8 +170,8 @@ nav ul li a::after {
 
 nav ul li a:hover::after,
 nav ul li a.active::after {
-    width: 70%;
-    left: 15%;
+    width: 90%;
+    left: 5%;
 }
 
 .mobile-menu-toggle {
@@ -400,6 +400,23 @@ h3 {
     position: relative;
 }
 
+/* Style for icons positioned on the left */
+.input-icon-wrapper > i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    font-size: 1rem;
+    z-index: 2;
+}
+
+.input-icon-wrapper input {
+    padding-left: 3rem;
+    padding-right: 2.5rem;
+}
+
 .avatar-character {
     width: 100px;
     height: 100px;
@@ -428,10 +445,6 @@ h3 {
     border-radius: 50%;
     top: 25px;
     transition: all 0.2s ease;
-}
-
-.input-icon-wrapper input {
-    padding-left: 3rem;
 }
 
 .avatar-eye.right {
@@ -504,21 +517,20 @@ h3 {
 
 .input-icon-wrapper .password-toggle {
     position: absolute;
-    right: 1rem;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
     transition: var(--transition);
-    padding: 0.5rem;
+    padding: 0.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    max-height: 40px;
-    top: 50%;
-    transform: translateY(-50%);
     z-index: 2;
+    font-size: 1rem;
 }
 
 .input-icon-wrapper .password-toggle:hover {
@@ -1133,11 +1145,11 @@ input::placeholder, textarea::placeholder {
 .step:not(:last-child)::after {
     content: '';
     position: absolute;
-    top: 1.5rem;
-    right: -1rem;
-    width: 2rem;
+    top: 3rem;
+    left: 50%;
+    width: 110%;
     height: 2px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background: var(--primary-color);
     z-index: 0;
 }
 
@@ -1279,6 +1291,12 @@ footer {
 
 [data-theme="dark"] .dark-label {
     color: #818cf8;
+}
+
+@media (max-width: 927px) {
+    .step:not(:last-child)::after {
+        display: none;
+    }
 }
 
 /* Responsive */
@@ -1807,7 +1825,7 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
 
 .checkbox-wrapper {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.75rem;
     position: relative;
 }
@@ -1833,7 +1851,8 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
     content: '';
     position: absolute;
     left: 0;
-    top: 0.125rem;
+    top: 50%;
+    transform: translateY(-50%);
     width: 1.25rem;
     height: 1.25rem;
     border: 2px solid var(--border-color);
@@ -1850,8 +1869,9 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
 .checkbox-wrapper input[type="checkbox"]:checked + .checkbox-label::after {
     content: '✓';
     position: absolute;
-    left: 0.35rem;
-    top: 0.125rem;
+    left: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
     color: white;
     font-size: 0.875rem;
     font-weight: bold;
