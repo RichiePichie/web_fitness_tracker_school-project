@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="public/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body>
     <header>
@@ -64,6 +65,3 @@
     
     <main>
         <div class="container">
-            <?php /*if (isset($pageTitle) && (!isset($_GET['page']) || $_GET['page'] !== 'home')): ?>
-                <h2><?php echo $pageTitle; ?></h2>
-            <?php endif; */?>

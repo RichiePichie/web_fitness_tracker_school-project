@@ -8,11 +8,11 @@ class User {
     }
 
     // Registrace nového uživatele
-    public function register($username, $email, $password, $firstName, $lastName, $gender = null) {
+    public function register($username, $email, $password, $gender) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        $sql = "INSERT INTO users (username, email, password, first_name, last_name, gender) 
-                VALUES (:username, :email, :password, :firstName, :lastName, :gender)";
+        $sql = "INSERT INTO users (username, email, password, gender) 
+                VALUES (:username, :email, :password, :gender)";
         
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -20,8 +20,6 @@ class User {
                 ':username' => $username,
                 ':email' => $email,
                 ':password' => $hashedPassword,
-                ':firstName' => $firstName,
-                ':lastName' => $lastName,
                 ':gender' => $gender
             ]);
             return $this->pdo->lastInsertId();

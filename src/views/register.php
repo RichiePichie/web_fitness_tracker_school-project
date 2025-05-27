@@ -1,3 +1,4 @@
+
 <?php
 $pageTitle = 'Registrace';
 include 'src/views/header.php';
@@ -24,34 +25,18 @@ unset($_SESSION['register_form_data']);
             </div>
         <?php endif; ?>
         
-        <div class="form-row">
-            <div class="form-group <?php echo isset($errors['first_name']) ? 'has-error' : ''; ?>">
-                <label for="first_name">Jméno</label>
-                <div class="input-icon-wrapper">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($formData['first_name'] ?? ''); ?>" placeholder="Zadejte jméno" required>
-                </div>
-                <?php if (isset($errors['first_name'])): ?>
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <?php echo $errors['first_name']; ?>
-                    </div>
-                <?php endif; ?>
+        <div class="form-group <?php echo isset($errors['username']) ? 'has-error' : ''; ?>">
+            <label for="username">Uživatelské jméno</label>
+            <div class="input-icon-wrapper">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($formData['username'] ?? ''); ?>" placeholder="Zadejte uživatelské jméno" required>
             </div>
-            
-            <div class="form-group <?php echo isset($errors['last_name']) ? 'has-error' : ''; ?>">
-                <label for="last_name">Příjmení</label>
-                <div class="input-icon-wrapper">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($formData['last_name'] ?? ''); ?>" placeholder="Zadejte příjmení" required>
+            <?php if (isset($errors['username'])): ?>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?php echo $errors['username']; ?>
                 </div>
-                <?php if (isset($errors['last_name'])): ?>
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <?php echo $errors['last_name']; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
+            <?php endif; ?>
         </div>
         
         <div class="form-group <?php echo isset($errors['email']) ? 'has-error' : ''; ?>">
@@ -60,12 +45,7 @@ unset($_SESSION['register_form_data']);
                 <i class="fas fa-envelope"></i>
                 <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" placeholder="Zadejte email" required>
             </div>
-            <?php if (isset($errors['email'])): ?>
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?php echo $errors['email']; ?>
-                </div>
-            <?php endif; ?>
+            
         </div>
         
         <div class="form-row">
@@ -131,19 +111,11 @@ unset($_SESSION['register_form_data']);
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn primary-btn">
+            <button type="submit" class="btn primary-btn w-100">
                 <i class="fas fa-user-plus btn-icon"></i>
                 Vytvořit účet
             </button>
         </div>
-        
-        <!-- Debug information -->
-        <?php if (isset($errors) && !empty($errors)): ?>
-            <div class="alert alert-info">
-                <h4>Debug information:</h4>
-                <pre><?php print_r($errors); ?></pre>
-            </div>
-        <?php endif; ?>
         
         <div class="form-footer">
             <p>Již máte účet? <a href="index.php?page=login">Přihlaste se</a></p>

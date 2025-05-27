@@ -9,11 +9,10 @@ class UserController {
     // Zpracování registrace uživatele
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $username = trim($_POST['username'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
             $passwordConfirm = $_POST['password_confirm'] ?? '';
-            $firstName = trim($_POST['first_name'] ?? '');
-            $lastName = trim($_POST['last_name'] ?? '');
             $gender = $_POST['gender'] ?? '';
             $terms = isset($_POST['terms']) ? true : false;
             
@@ -30,6 +29,12 @@ class UserController {
             } elseif ($this->userModel->emailExists($email)) {
                 $errors['email'] = 'Email již existuje';
             }
+
+            if (empty($username)) {
+                $errors['username'] = 'Uživatelské jméno je povinné';
+            } elseif ($this->userModel->usernameExists($email)) {
+                $errors['username'] = 'Toto uživatelské jméno je již zabrané';
+            }
             
             if (empty($password)) {
                 $errors['password'] = 'Heslo je povinné';
@@ -41,14 +46,6 @@ class UserController {
                 $errors['password_confirm'] = 'Hesla se neshodují';
             }
             
-            if (empty($firstName)) {
-                $errors['first_name'] = 'Jméno je povinné';
-            }
-            
-            if (empty($lastName)) {
-                $errors['last_name'] = 'Příjmení je povinné';
-            }
-            
             if (empty($gender)) {
                 $errors['gender'] = 'Pohlaví je povinné';
             }
@@ -58,17 +55,11 @@ class UserController {
             }
             
             if (empty($errors)) {
-                // Generate username from first and last name
-                $username = strtolower($firstName . '.' . $lastName);
-                // Add a random number if needed to make unique
-                if ($this->userModel->usernameExists($username)) {
-                    $username = $username . rand(100, 999);
-                }
                 
                 // Debug - log the data being passed to the model
-                error_log("Attempting to register user: $username, $email, [password], $firstName, $lastName, $gender");
+                error_log("Attempting to register user: $username, $email, [password], $gender");
                 
-                $userId = $this->userModel->register($username, $email, $password, $firstName, $lastName, $gender);
+                $userId = $this->userModel->register($username, $email, $password, $gender);
                 
                 if ($userId) {
                     $_SESSION['user_id'] = $userId;
@@ -78,23 +69,21 @@ class UserController {
                     exit;
                 } else {
                     $errors['general'] = 'Nastala chyba při registraci, zkuste to znovu';
-                    // Debug - log the error
                     error_log("Registration failed. Last error: " . implode(', ', $this->userModel->getLastError()));
+
+                    // Uložíme chyby a data do session
+                    $_SESSION['register_errors'] = $errors;
+                    $_SESSION['register_form_data'] = [
+                        'username' =>$username,
+                        'email' => $email,
+                        'gender' => $gender,
+                        'terms' => $terms
+                    ];
+                    
+                    header('Location: index.php?page=register');
+                    exit;
                 }
             }
-            
-            // Pokud došlo k chybě, uložíme chyby a data do session
-            $_SESSION['register_errors'] = $errors;
-            $_SESSION['register_form_data'] = [
-                'email' => $email,
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'gender' => $gender,
-                'terms' => $terms
-            ];
-            
-            header('Location: index.php?page=register');
-            exit;
         }
     }
     
