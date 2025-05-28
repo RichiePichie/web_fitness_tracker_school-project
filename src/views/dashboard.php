@@ -10,7 +10,7 @@ $goalModel = new Goal($pdo);
 $userId = $_SESSION['user_id'];
 $user = $userModel->getById($userId);
 $stats = $exerciseModel->getUserStats($userId);
-$recentExercises = $exerciseModel->getRecentByUser($userId, 7);
+$recentExercises = $exerciseModel->getRecentTrainingSessions($userId, 7);
 $activeGoals = $goalModel->getActiveByUser($userId);
 
 // Kontrola stavu cílů
@@ -19,7 +19,7 @@ $goalModel->checkGoalStatus($userId);
 
 <div class="dashboard">
     <div class="dashboard-welcome">
-        <h3>Vítejte zpět, <?php echo htmlspecialchars($user['first_name'] ?: $user['username']); ?>!</h3>
+        <h2>Vítejte zpět, <?php echo htmlspecialchars($user['username']); ?>!</h2>
         <p>Zde jsou vaše statistiky a přehled aktivit.</p>
     </div>
     
@@ -30,7 +30,7 @@ $goalModel->checkGoalStatus($userId);
             </div>
             <div class="stat-info">
                 <h4>Celkem cvičení</h4>
-                <p class="stat-value"><?php echo $stats['total_exercises'] ?: 0; ?></p>
+                <p class="stat-value"><?php echo $stats['total_sessions'] ?: 0; ?></p>
             </div>
         </div>
         

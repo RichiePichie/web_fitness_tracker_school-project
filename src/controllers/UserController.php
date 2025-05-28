@@ -27,7 +27,7 @@ class UserController {
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Neplatný email';
             } elseif ($this->userModel->emailExists($email)) {
-                $errors['email'] = 'Email již existuje';
+                $errors['email'] = 'Účet s tímto emailem již existuje';
             }
 
             if (empty($username)) {
@@ -83,6 +83,18 @@ class UserController {
                     header('Location: index.php?page=register');
                     exit;
                 }
+            }else{
+                // Uložíme chyby a data do session
+                $_SESSION['register_errors'] = $errors;
+                $_SESSION['register_form_data'] = [
+                    'username' => $username,
+                    'email' => $email,
+                    'gender' => $gender,
+                    'terms' => $terms
+                ];
+        
+                header('Location: index.php?page=register');
+                exit;
             }
         }
     }
@@ -92,11 +104,18 @@ class UserController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
+            $remember = isset($_POST['remember']) ? true : false;
+            
+            // Debug - log the POST data
+            error_log("Login POST data: " . print_r($_POST, true));
             
             $errors = [];
             
+            // Validace vstupu
             if (empty($email)) {
                 $errors['email'] = 'Email je povinný';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors['email'] = 'Neplatný email';
             }
             
             if (empty($password)) {
@@ -104,25 +123,60 @@ class UserController {
             }
             
             if (empty($errors)) {
+                // Debug - log the data being passed to the model
+                error_log("Attempting to login user: $email");
+                
                 $user = $this->userModel->login($email, $password);
                 
                 if ($user) {
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
+                    $_SESSION['user_type'] = $user['user_type'];
+                    
+                    /* Pokud uživatel zaškrtl "Zapamatovat si mě" (Kdyžtak dodělat)
+                    if ($remember) {
+                        // Vytvoření bezpečného tokenu
+                        $token = bin2hex(random_bytes(32));
+                        $expires = time() + (30 * 24 * 60 * 60); // 30 dní
+                        
+                        // Uložení tokenu do databáze (předpokládá existenci tabulky remember_tokens)
+                        $sql = "INSERT INTO remember_tokens (user_id, token, expires_at) 
+                                VALUES (:user_id, :token, :expires)";
+                        $stmt = $this->pdo->prepare($sql);
+                        $stmt->execute([
+                            ':user_id' => $user['id'],
+                            ':token' => $token,
+                            ':expires' => date('Y-m-d H:i:s', $expires)
+                        ]);
+                        
+                        // Nastavení cookie
+                        setcookie('remember_token', $token, $expires, '/', '', true, true);
+                    }*/
                     
                     header('Location: index.php?page=dashboard');
                     exit;
                 } else {
                     $errors['general'] = 'Neplatný email nebo heslo';
+                    error_log("Login failed for email: $email");
+                    
+                    // Uložíme chyby a email do session
+                    $_SESSION['login_errors'] = $errors;
+                    $_SESSION['login_form_data'] = [
+                        'email' => $email,
+                        'remember' => $remember
+                    ];
+                    
+                    header('Location: index.php?page=login');
+                    exit;
                 }
+            } else {
+                // Uložíme chyby a data do session
+                $_SESSION['login_errors'] = $errors;
+                $_SESSION['login_email'] = $email;
+                
+                header('Location: index.php?page=login');
+                exit;
             }
-            
-            // Pokud došlo k chybě, uložíme chyby a email do session
-            $_SESSION['login_errors'] = $errors;
-            $_SESSION['login_email'] = $email;
-            
-            header('Location: index.php?page=login');
-            exit;
         }
     }
     
@@ -198,8 +252,8 @@ class UserController {
                 }
                 
                 // Povolené typy souborů
-                elseif (!in_array($imageFileType, ['jpg', 'jpeg', 'png', 'gif'])) {
-                    $errors['profile_image'] = 'Jsou povoleny pouze JPG, JPEG, PNG a GIF soubory';
+                elseif (!in_array($imageFileType, ['jpg', 'jpeg', 'png'])) {
+                    $errors['profile_image'] = 'Jsou povoleny pouze JPG, JPEG a PNG formáty';
                 }
                 
                 // Nahrání souboru

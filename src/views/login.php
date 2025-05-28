@@ -14,9 +14,6 @@ unset($_SESSION['login_email']);
 <div class="auth-form">
     <div class="card-header">
         <h3 class="card-title">Přihlášení</h3>
-        <div class="auth-icon">
-            <i class="fas fa-sign-in-alt"></i>
-        </div>
     </div>
     
     <form action="index.php?action=login" method="post">
@@ -66,7 +63,7 @@ unset($_SESSION['login_email']);
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn primary-btn btn-block">
+            <button type="submit" class="btn primary-btn btn-block w-full">
                 <i class="fas fa-sign-in-alt btn-icon"></i>
                 Přihlásit se
             </button>

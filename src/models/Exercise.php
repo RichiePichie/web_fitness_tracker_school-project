@@ -6,39 +6,81 @@ class Exercise {
         $this->pdo = $pdo;
     }
 
-    // Přidání nového cvičení
-    public function create($userId, $title, $description, $exerciseType, $duration, $caloriesBurned, $date) {
-        $sql = "INSERT INTO exercises (user_id, title, description, exercise_type, duration, calories_burned, date) 
-                VALUES (:userId, :title, :description, :exerciseType, :duration, :caloriesBurned, :date)";
+    // Vytvoření nové tréninkové jednotky
+    public function createTrainingSession($userId, $date, $totalDuration = null, $totalCaloriesBurned = null, $notes = null) {
+        $sql = "INSERT INTO training_sessions (user_id, date, total_duration, total_calories_burned, notes) 
+                VALUES (:userId, :date, :totalDuration, :totalCaloriesBurned, :notes)";
         
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
                 ':userId' => $userId,
-                ':title' => $title,
-                ':description' => $description,
-                ':exerciseType' => $exerciseType,
-                ':duration' => $duration,
-                ':caloriesBurned' => $caloriesBurned,
-                ':date' => $date
+                ':date' => $date,
+                ':totalDuration' => $totalDuration,
+                ':totalCaloriesBurned' => $totalCaloriesBurned,
+                ':notes' => $notes
             ]);
             return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
+            error_log("Chyba při vytváření tréninkové jednotky: " . $e->getMessage());
             return false;
         }
     }
 
-    // Získání cvičení podle ID
-    public function getById($id) {
-        $sql = "SELECT * FROM exercises WHERE id = :id";
+    // Přidání cviku do tréninkové jednotky
+    public function addExerciseToSession($trainingSessionId, $individualExerciseId, $sets = null, $reps = null, $weight = null, $distance = null) {
+        $sql = "INSERT INTO training_exercise_entries 
+                (training_session_id, individual_exercise_id, sets, reps, weight, distance) 
+                VALUES (:trainingSessionId, :individualExerciseId, :sets, :reps, :weight, :distance)";
+        
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':trainingSessionId' => $trainingSessionId,
+                ':individualExerciseId' => $individualExerciseId,
+                ':sets' => $sets,
+                ':reps' => $reps,
+                ':weight' => $weight,
+                ':distance' => $distance
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            error_log("Chyba při přidávání cviku do tréninku: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Získání tréninkové jednotky podle ID
+    public function getTrainingSessionById($id) {
+        $sql = "SELECT ts.*, 
+                GROUP_CONCAT(
+                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance)
+                    SEPARATOR '||'
+                ) as exercises
+                FROM training_sessions ts
+                LEFT JOIN training_exercise_entries tee ON ts.id = tee.training_session_id
+                LEFT JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
+                WHERE ts.id = :id
+                GROUP BY ts.id";
+        
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Získání všech cvičení uživatele
-    public function getAllByUser($userId, $limit = null, $offset = 0) {
-        $sql = "SELECT * FROM exercises WHERE user_id = :userId ORDER BY date DESC";
+    // Získání všech tréninkových jednotek uživatele
+    public function getAllTrainingSessionsByUser($userId, $limit = null, $offset = 0) {
+        $sql = "SELECT ts.*, 
+                GROUP_CONCAT(
+                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance)
+                    SEPARATOR '||'
+                ) as exercises
+                FROM training_sessions ts
+                LEFT JOIN training_exercise_entries tee ON ts.id = tee.training_session_id
+                LEFT JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
+                WHERE ts.user_id = :userId
+                GROUP BY ts.id
+                ORDER BY ts.date DESC";
         
         if ($limit !== null) {
             $sql .= " LIMIT :limit OFFSET :offset";
@@ -56,8 +98,8 @@ class Exercise {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Aktualizace cvičení
-    public function update($id, $data) {
+    // Aktualizace tréninkové jednotky
+    public function updateTrainingSession($id, $data) {
         $setFields = [];
         $params = [':id' => $id];
         
@@ -69,32 +111,33 @@ class Exercise {
         }
         
         $setClause = implode(', ', $setFields);
-        $sql = "UPDATE exercises SET $setClause WHERE id = :id";
+        $sql = "UPDATE training_sessions SET $setClause WHERE id = :id";
         
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             return true;
         } catch (PDOException $e) {
+            error_log("Chyba při aktualizaci tréninkové jednotky: " . $e->getMessage());
             return false;
         }
     }
 
-    // Odstranění cvičení
-    public function delete($id) {
-        $sql = "DELETE FROM exercises WHERE id = :id";
+    // Odstranění tréninkové jednotky
+    public function deleteTrainingSession($id) {
+        $sql = "DELETE FROM training_sessions WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
 
-    // Získání statistik cvičení uživatele
+    // Získání statistik tréninků uživatele
     public function getUserStats($userId) {
         $sql = "SELECT 
-                COUNT(*) as total_exercises, 
-                SUM(duration) as total_duration, 
-                SUM(calories_burned) as total_calories,
+                COUNT(*) as total_sessions,
+                SUM(total_duration) as total_duration,
+                SUM(total_calories_burned) as total_calories,
                 COUNT(DISTINCT DATE(date)) as total_days
-                FROM exercises 
+                FROM training_sessions 
                 WHERE user_id = :userId";
         
         $stmt = $this->pdo->prepare($sql);
@@ -102,12 +145,20 @@ class Exercise {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Získání cvičení uživatele za posledních N dní
-    public function getRecentByUser($userId, $days = 7) {
-        $sql = "SELECT * FROM exercises 
-                WHERE user_id = :userId 
-                AND date >= DATE_SUB(CURDATE(), INTERVAL :days DAY) 
-                ORDER BY date DESC";
+    // Získání tréninků uživatele za posledních N dní
+    public function getRecentTrainingSessions($userId, $days = 7) {
+        $sql = "SELECT ts.*, 
+                GROUP_CONCAT(
+                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance)
+                    SEPARATOR '||'
+                ) as exercises
+                FROM training_sessions ts
+                LEFT JOIN training_exercise_entries tee ON ts.id = tee.training_session_id
+                LEFT JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
+                WHERE ts.user_id = :userId 
+                AND ts.date >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+                GROUP BY ts.id
+                ORDER BY ts.date DESC";
         
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);

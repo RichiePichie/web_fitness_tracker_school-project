@@ -8,7 +8,7 @@ class Goal {
 
     // Vytvoření nového cíle
     public function create($userId, $title, $description, $goalType, $targetValue, $currentValue, $startDate, $endDate) {
-        $sql = "INSERT INTO goals (user_id, title, description, goal_type, target_value, current_value, start_date, end_date) 
+        $sql = "INSERT INTO user_goals (user_id, title, description, goal_type, target_value, current_value, start_date, end_date) 
                 VALUES (:userId, :title, :description, :goalType, :targetValue, :currentValue, :startDate, :endDate)";
         
         try {
@@ -31,7 +31,7 @@ class Goal {
 
     // Získání cíle podle ID
     public function getById($id) {
-        $sql = "SELECT * FROM goals WHERE id = :id";
+        $sql = "SELECT * FROM user_goals WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -39,7 +39,7 @@ class Goal {
 
     // Získání všech cílů uživatele
     public function getAllByUser($userId) {
-        $sql = "SELECT * FROM goals WHERE user_id = :userId ORDER BY end_date ASC";
+        $sql = "SELECT * FROM user_goals WHERE user_id = :userId ORDER BY end_date ASC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':userId' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -47,7 +47,7 @@ class Goal {
 
     // Získání aktivních cílů uživatele
     public function getActiveByUser($userId) {
-        $sql = "SELECT * FROM goals 
+        $sql = "SELECT * FROM user_goals 
                 WHERE user_id = :userId 
                 AND status = 'active' 
                 AND end_date >= CURDATE() 
@@ -71,7 +71,7 @@ class Goal {
         }
         
         $setClause = implode(', ', $setFields);
-        $sql = "UPDATE goals SET $setClause WHERE id = :id";
+        $sql = "UPDATE user_goals SET $setClause WHERE id = :id";
         
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -84,21 +84,21 @@ class Goal {
 
     // Aktualizace aktuální hodnoty cíle
     public function updateCurrentValue($id, $currentValue) {
-        $sql = "UPDATE goals SET current_value = :currentValue WHERE id = :id";
+        $sql = "UPDATE user_goals SET current_value = :currentValue WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':currentValue' => $currentValue, ':id' => $id]);
     }
 
     // Změna stavu cíle
     public function updateStatus($id, $status) {
-        $sql = "UPDATE goals SET status = :status WHERE id = :id";
+        $sql = "UPDATE user_goals SET status = :status WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':status' => $status, ':id' => $id]);
     }
 
     // Odstranění cíle
     public function delete($id) {
-        $sql = "DELETE FROM goals WHERE id = :id";
+        $sql = "DELETE FROM user_goals WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
@@ -106,7 +106,7 @@ class Goal {
     // Kontrola a aktualizace stavu cílů
     public function checkGoalStatus($userId) {
         // Získání aktivních cílů
-        $sql = "SELECT * FROM goals WHERE user_id = :userId AND status = 'active'";
+        $sql = "SELECT * FROM user_goals WHERE user_id = :userId AND status = 'active'";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':userId' => $userId]);
         $goals = $stmt->fetchAll(PDO::FETCH_ASSOC);

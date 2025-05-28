@@ -45,7 +45,12 @@ unset($_SESSION['register_form_data']);
                 <i class="fas fa-envelope"></i>
                 <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" placeholder="Zadejte email" required>
             </div>
-            
+            <?php if (isset($errors['email'])): ?>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?php echo $errors['email']; ?>
+                </div>
+            <?php endif; ?>
         </div>
         
         <div class="form-row">

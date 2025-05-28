@@ -32,12 +32,15 @@ class User {
 
     // Přihlášení uživatele
     public function login($email, $password) {
-        $sql = "SELECT * FROM users WHERE email = :email";
+        $sql = "SELECT id, username, email, password, user_type, gender, height, weight, 
+                date_of_birth, profile_image, created_at 
+                FROM users WHERE email = :email";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($user && password_verify($password, $user['password'])) {
+            unset($user['password']);
             return $user;
         }
         
@@ -54,11 +57,12 @@ class User {
 
     // Aktualizace profilu uživatele
     public function updateProfile($id, $data) {
+        $allowedFields = ['username', 'email', 'gender', 'height', 'weight', 'date_of_birth'];
         $setFields = [];
         $params = [':id' => $id];
         
         foreach ($data as $key => $value) {
-            if ($key !== 'id' && $key !== 'password') {
+            if (in_array($key, $allowedFields)) {
                 $setFields[] = "$key = :$key";
                 $params[":$key"] = $value;
             }
@@ -69,23 +73,38 @@ class User {
             $params[':password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
         
+        if (empty($setFields)) {
+            return false;
+        }
+        
         $setClause = implode(', ', $setFields);
-        $sql = "UPDATE users SET $setClause WHERE id = :id";
+        $sql = "UPDATE users SET $setClause, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             return true;
         } catch (PDOException $e) {
+            $this->lastError[] = $e->getMessage();
+            error_log("Profile update error: " . $e->getMessage());
             return false;
         }
     }
 
     // Nahrání profilového obrázku
-    public function uploadProfileImage($id, $imagePath) {
-        $sql = "UPDATE users SET profile_image = :imagePath WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([':imagePath' => $imagePath, ':id' => $id]);
+    public function uploadProfileImage($id, $imageData) {
+        $sql = "UPDATE users SET profile_image = :imageData, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([
+                ':imageData' => $imageData,
+                ':id' => $id
+            ]);
+        } catch (PDOException $e) {
+            $this->lastError[] = $e->getMessage();
+            error_log("Profile image upload error: " . $e->getMessage());
+            return false;
+        }
     }
 
     // Kontrola, zda uživatelské jméno již existuje
@@ -104,7 +123,20 @@ class User {
         return $stmt->fetchColumn() > 0;
     }
 
-    // Get last error
+    // Získání statistik uživatele
+    public function getUserStats($userId) {
+        $sql = "SELECT 
+                (SELECT COUNT(*) FROM training_sessions WHERE user_id = :userId) as total_sessions,
+                (SELECT COUNT(*) FROM user_goals WHERE user_id = :userId) as total_goals,
+                (SELECT COUNT(*) FROM user_goals WHERE user_id = :userId AND status = 'completed') as completed_goals
+                FROM dual";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':userId' => $userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Získání poslední chyby
     public function getLastError() {
         return $this->lastError;
     }

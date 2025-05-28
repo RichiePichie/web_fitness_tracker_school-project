@@ -14,7 +14,7 @@ class ExerciseController {
         }
         
         $userId = $_SESSION['user_id'];
-        $exercises = $this->exerciseModel->getAllByUser($userId);
+        $exercises = $this->exerciseModel->getTrainingSessionById($userId);
         
         include __DIR__ . '/../views/exercises.php';
     }
