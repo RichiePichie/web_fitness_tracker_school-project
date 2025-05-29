@@ -78,12 +78,14 @@ class User {
         }
         
         $setClause = implode(', ', $setFields);
+        error_log("Data, které se updatují: " . print_r($setClause, true));
         $sql = "UPDATE users SET $setClause, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
         
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             return true;
+            
         } catch (PDOException $e) {
             $this->lastError[] = $e->getMessage();
             error_log("Profile update error: " . $e->getMessage());
@@ -91,21 +93,6 @@ class User {
         }
     }
 
-    // Nahrání profilového obrázku
-    public function uploadProfileImage($id, $imageData) {
-        $sql = "UPDATE users SET profile_image = :imageData, updated_at = CURRENT_TIMESTAMP WHERE id = :id";
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([
-                ':imageData' => $imageData,
-                ':id' => $id
-            ]);
-        } catch (PDOException $e) {
-            $this->lastError[] = $e->getMessage();
-            error_log("Profile image upload error: " . $e->getMessage());
-            return false;
-        }
-    }
 
     // Kontrola, zda uživatelské jméno již existuje
     public function usernameExists($username) {

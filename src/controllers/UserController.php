@@ -198,17 +198,16 @@ class UserController {
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userId = $_SESSION['user_id'];
-            $firstName = trim($_POST['first_name'] ?? '');
-            $lastName = trim($_POST['last_name'] ?? '');
             $height = !empty($_POST['height']) ? (float)$_POST['height'] : null;
             $weight = !empty($_POST['weight']) ? (float)$_POST['weight'] : null;
             $dateOfBirth = !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null;
-            $password = $_POST['password'] ?? '';
-            $passwordConfirm = $_POST['password_confirm'] ?? '';
+            $email = !empty($_POST['email']) ? $_POST['email'] : null;
+            $username = !empty($_POST['username']) ? $_POST['username'] : $_SESSION['username'];
+            $password = $_POST['current_password'] ?? '';
+            $passwordNew = $_POST['new_password'] ?? '';
+            $passwordConfirm = $_POST['confirm_password'] ?? '';
             
             $data = [
-                'first_name' => $firstName,
-                'last_name' => $lastName,
                 'height' => $height,
                 'weight' => $weight,
                 'date_of_birth' => $dateOfBirth
@@ -217,52 +216,35 @@ class UserController {
             $errors = [];
             
             // Validace nového hesla, pokud bylo zadáno
-            if (!empty($password)) {
-                if (strlen($password) < 6) {
+            if (!empty($passwordNew)) {
+                if (strlen($passwordNew) < 6) {
                     $errors['password'] = 'Heslo musí mít alespoň 6 znaků';
                 } elseif ($password !== $passwordConfirm) {
                     $errors['password_confirm'] = 'Hesla se neshodují';
                 } else {
-                    $data['password'] = $password;
+                    $data['passwordNew'] = $password;
                 }
             }
-            
-            // Zpracování nahraného obrázku
-            if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-                $targetDir = 'public/images/profiles/';
-                
-                // Vytvoření složky, pokud neexistuje
-                if (!file_exists($targetDir)) {
-                    mkdir($targetDir, 0777, true);
+
+            if ($username != $_SESSION["username"]) {
+                if (empty($username)) {
+                    $errors['username'] = 'Uživatelské jméno je povinné';
+                } elseif ($this->userModel->usernameExists($username)) {
+                    $errors['username'] = 'Toto jmeno už někdo používá';
+                } else {
+                    $data['username'] = $username;
                 }
-                
-                $fileName = basename($_FILES['profile_image']['name']);
-                $targetFile = $targetDir . $userId . '_' . $fileName;
-                $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-                
-                // Kontrola, zda je soubor obrázek
-                $check = getimagesize($_FILES['profile_image']['tmp_name']);
-                if ($check === false) {
-                    $errors['profile_image'] = 'Soubor není obrázek';
-                }
-                
-                // Kontrola velikosti (max 2MB)
-                elseif ($_FILES['profile_image']['size'] > 2000000) {
-                    $errors['profile_image'] = 'Soubor je příliš velký (max 2MB)';
-                }
-                
-                // Povolené typy souborů
-                elseif (!in_array($imageFileType, ['jpg', 'jpeg', 'png'])) {
-                    $errors['profile_image'] = 'Jsou povoleny pouze JPG, JPEG a PNG formáty';
-                }
-                
-                // Nahrání souboru
-                elseif (empty($errors)) {
-                    if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $targetFile)) {
-                        $this->userModel->uploadProfileImage($userId, $targetFile);
-                    } else {
-                        $errors['profile_image'] = 'Nastala chyba při nahrávání souboru';
-                    }
+            }
+
+            if ($email != $this->userModel->getById($userId)['email']) {
+                if (empty($email)) {
+                    $errors['email'] = 'Email je povinný';
+                } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $errors['email'] = 'Nový email je neplatný';
+                } elseif ($this->userModel->emailExists($email)) {
+                    $errors['email'] = 'Tento email už někdo používá';
+                } else {
+                    $data['email'] = $email;
                 }
             }
             
@@ -271,6 +253,7 @@ class UserController {
                 
                 if ($result) {
                     $_SESSION['profile_updated'] = true;
+                    $_SESSION['username'] = $username;
                     header('Location: index.php?page=profile');
                     exit;
                 } else {
