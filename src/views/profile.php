@@ -1,10 +1,18 @@
-<?php include 'header.php'; ?>
+<?php
+$pageTitle = 'Profil';
+include 'src/views/header.php';
+
+// Get error messages and form data if they exist
+$errors = $_SESSION['profile_errors'] ?? [];
+
+unset($_SESSION['register_errors']);
+?>
 
 <div class="container profile">
     <section class="card">
         <h2 class="mb-4">Můj profil</h2>
 
-        <?php //print_r($_SESSION);?>
+        <?php print_r($_SESSION);?>
 
         <?php if (!empty($_SESSION['profile_updated'])): ?>
             <div class="alert alert-success">Profil byl úspěšně aktualizován.</div>
@@ -32,7 +40,7 @@
                 <div class="form-group">
                     <label for="height">Výška (cm)</label>
                     <input type="number" step="0.01" name="height" id="height"
-                           value="<?= htmlspecialchars($user['height'] ?? '') ?>">
+										value="<?= htmlspecialchars($user['height'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                     <label for="weight">Váha (kg)</label>

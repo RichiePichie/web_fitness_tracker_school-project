@@ -33,7 +33,7 @@ class User {
     // Přihlášení uživatele
     public function login($email, $password) {
         $sql = "SELECT id, username, email, password, user_type, gender, height, weight, 
-                date_of_birth, profile_image, created_at 
+                date_of_birth, created_at 
                 FROM users WHERE email = :email";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':email' => $email]);

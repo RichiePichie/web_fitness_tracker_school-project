@@ -104,7 +104,7 @@ unset($_SESSION['register_form_data']);
         
         <div class="form-group checkbox-group">
             <div class="checkbox-wrapper">
-                <input type="checkbox" id="terms" name="terms" required <?php echo isset($formData['terms']) ? 'checked' : ''; ?>>
+                <input type="checkbox" id="terms" name="terms" <?php echo (isset($formData['terms'])) && $formData['terms'] == 1 ? 'checked' : ''; ?>>
                 <label for="terms" class="checkbox-label">Souhlasím s <a href="#" class="link">podmínkami použití</a> a <a href="#" class="link">ochranou osobních údajů</a></label>
             </div>
             <?php if (isset($errors['terms'])): ?>

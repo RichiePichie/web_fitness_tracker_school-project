@@ -207,13 +207,46 @@ class UserController {
             $passwordNew = $_POST['new_password'] ?? '';
             $passwordConfirm = $_POST['confirm_password'] ?? '';
             
-            $data = [
-                'height' => $height,
-                'weight' => $weight,
-                'date_of_birth' => $dateOfBirth
-            ];
-            
+						$user = $this->userModel->getById($userId);
+
             $errors = [];
+
+						if(!is_nan($height)) {
+							$errors['height'] = 'Výška musí být číslo '. $height;
+						}elseif($height < 50 || $height > 250) {
+							$errors['height'] = 'Výška musí být mezi 50 a 250 cm';
+						}elseif($user['height'] != $height){
+							$height = round($height, 2);
+							$data['height'] = $height;
+						}
+
+						if(!is_nan($weight)) {
+							$errors['weight'] = 'Váha musí být číslo';
+						}elseif($weight < 20 || $weight > 500) {
+							$errors['weight'] = 'Váha musí být mezi 20 a 500 kg';
+						}elseif($user['weight'] != $weight){
+							$weight = round($weight, 2);
+							$data['weight'] = $weight;
+						}
+
+						if(!empty($dateOfBirth)) {
+							$date = DateTime::createFromFormat('d.m.Y', $dateOfBirth);
+
+							if(!$date){
+								$errors['date_of_birth'] = 'Datum narození musí být ve formátu DD.MM.RRRR';
+							}else{
+
+								$dnes = new DateTime();
+								$dnes->setTime(0, 0, 0);
+								$date->setTime(0, 0, 0);
+
+								if($date > $dnes){
+									$errors['date_of_birth'] = 'Datum narození nesmí být v budoucnosti';
+								}elseif($user['date_of_birth'] != $dateOfBirth){
+									$data['date_of_birth'] = $dateOfBirth;
+								}
+							}
+						}
             
             // Validace nového hesla, pokud bylo zadáno
             if (!empty($passwordNew)) {
@@ -249,8 +282,11 @@ class UserController {
             }
             
             if (empty($errors)) {
+							if(!empty($data)) {
                 $result = $this->userModel->updateProfile($userId, $data);
-                
+
+								unset($_SESSION['profile_errors']);
+
                 if ($result) {
                     $_SESSION['profile_updated'] = true;
                     $_SESSION['username'] = $username;
@@ -259,10 +295,12 @@ class UserController {
                 } else {
                     $errors['general'] = 'Nastala chyba při aktualizaci profilu';
                 }
-            }
-            
-            // Pokud došlo k chybě, uložíme chyby do session
-            $_SESSION['profile_errors'] = $errors;
+							}
+            }else{
+							// Pokud došlo k chybě, uložíme chyby do session
+							$_SESSION['profile_errors'] = $errors;
+						}
+                       
             header('Location: index.php?page=profile');
             exit;
         }
