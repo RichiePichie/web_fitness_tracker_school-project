@@ -136,6 +136,17 @@ Vyžaduje přihlášení administrátorským účtem.
 - **Nastavení aplikace (`settings.php`):
     - Stránka je vytvořena jako placeholder pro budoucí globální nastavení aplikace.
 
+**Vylepšení uživatelského rozhraní Admin Panelu (UI Enhancements):**
+Administrátorský panel byl aktualizován pro lepší použitelnost a konzistentní vzhled napříč všemi stránkami. Klíčové změny zahrnují:
+
+-   **Responzivní design:** Administrátorský panel je nyní responzivní a přizpůsobuje se různým velikostem obrazovky, včetně stolních počítačů, tabletů a mobilních zařízení. To zajišťuje dobrou uživatelskou zkušenost bez ohledu na použité zařízení.
+    -   Navigační menu se přizpůsobuje menším obrazovkám.
+    -   Rozložení obsahu je optimalizováno pro čitelnost.
+-   **Centralizovaný stylesheet:** Veškeré stylování pro administrátorský panel je nyní spravováno jediným externím souborem stylů umístěným v `public/css/styles.css`. Tento přístup zlepšuje udržovatelnost, konzistenci a výkon. Inline styly byly odstraněny z jednotlivých administrátorských stránek.
+-   **Vylepšené rozložení:**
+    -   Patička je nyní "přilepená" (sticky) a vždy zůstane na spodní části viewportu, i na stránkách s malým obsahem.
+    -   Byla zavedena konzistentní vizuální mezera mezi hlavním záhlavím a navigační lištou pro lepší vizuální oddělení.
+
 **Struktura souborů Admin Panelu:**
 - `/admin/index.php`: Dashboard.
 - `/admin/login.php`: Přihlašovací formulář.
