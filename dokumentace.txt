@@ -1,0 +1,188 @@
+========================================
+PROJEKTOVÁ DOKUMENTACE - FITNESS TRACKER
+========================================
+
+Datum vytvoření dokumentace: 30.05.2025
+Verze aplikace: 1.0 (předpoklad)
+
+Obsah:
+1. Přehled projektu
+2. Klíčové funkce
+3. Použité technologie
+4. Struktura projektu
+5. Instalace a nastavení
+6. Databázové schéma (přehled)
+7. Admin Panel
+8. Možná budoucí vylepšení
+9. Autoři
+10. Licence
+
+----------------------------------------
+1. Přehled projektu
+----------------------------------------
+Fitness Tracker je webová aplikace navržená pro uživatele, kteří chtějí sledovat své cvičební aktivity, nastavovat si fitness cíle a monitorovat svůj pokrok. Aplikace byla vyvinuta jako školní projekt. Cílem je poskytnout jednoduché a intuitivní rozhraní pro správu osobních fitness dat.
+
+----------------------------------------
+2. Klíčové funkce
+----------------------------------------
+Aplikace nabízí následující hlavní funkce:
+
+Pro běžné uživatele:
+- Registrace a přihlášení: Bezpečný systém pro správu uživatelských účtů.
+- Správa cvičení: Možnost přidávat, upravovat a mazat záznamy o cvičení (např. typ cvičení, délka, spálené kalorie).
+- Fitness cíle: Uživatelé si mohou nastavit osobní cíle (např. počet kroků za den, týdenní počet hodin cvičení) a sledovat jejich plnění.
+- Statistiky a přehledy: Vizualizace pokroku prostřednictvím grafů a statistik.
+- Profil uživatele: Možnost nahrát profilový obrázek a spravovat osobní údaje.
+
+Pro administrátory (prostřednictvím Admin Panelu):
+- Přehled systému: Základní dashboard pro monitoring aplikace.
+- Správa uživatelů (plánováno): Možnost zobrazit, upravit, případně smazat uživatelské účty.
+- Správa aktivit (plánováno): Přehled a správa dat o aktivitách zadaných uživateli.
+- Nastavení aplikace (plánováno): Konfigurace globálních parametrů aplikace.
+
+----------------------------------------
+3. Použité technologie
+----------------------------------------
+- Backend: PHP (verze 7.4+)
+- Databáze: MySQL (nebo kompatibilní, např. MariaDB)
+- Frontend: HTML5, CSS3, JavaScript (pro interaktivitu)
+- Webový server: Apache nebo Nginx (s podporou PHP)
+
+----------------------------------------
+4. Struktura projektu
+----------------------------------------
+/ (kořenový adresář)
+|-- admin/
+|   |-- index.php             # Hlavní stránka admin panelu
+|   |-- (další admin soubory...)
+|-- public/                   # Veřejně přístupné soubory (CSS, JS, obrázky)
+|   |-- css/
+|   |-- js/
+|   |-- images/
+|-- src/                      # Zdrojové kódy aplikace (PHP třídy, funkce)
+|   |-- db.php                # Skript pro připojení k databázi (příklad)
+|   |-- User.php              # Třída pro uživatele (příklad)
+|   |-- (další PHP soubory...)
+|-- config.php                # Konfigurační soubor (připojení k DB, atd.)
+|-- database.sql              # SQL skript pro vytvoření databázové struktury
+|-- index.php                 # Hlavní vstupní bod aplikace pro uživatele
+|-- login.php                 # Stránka pro přihlášení
+|-- register.php              # Stránka pro registraci
+|-- README.md                 # Základní informace o projektu
+|-- dokumentace.txt           # Tato podrobná dokumentace
+|-- LICENSE                   # Licenční ujednání
+
+----------------------------------------
+5. Instalace a nastavení
+----------------------------------------
+1.  **Klonování repozitáře**:
+    `git clone https://github.com/vas-uzivatelske-jmeno/fitness-tracker.git`
+    (Nahraďte URL skutečnou URL vašeho repozitáře)
+
+2.  **Vytvoření databáze**:
+    - Vytvořte novou databázi ve vašem MySQL/MariaDB serveru.
+    - Importujte strukturu databáze pomocí souboru `database.sql`:
+      `mysql -u <username> -p <database_name> < database.sql`
+
+3.  **Konfigurace aplikace**:
+    - Přejmenujte/zkopírujte `config.example.php` na `config.php` (pokud existuje vzorový soubor).
+    - Upravte soubor `config.php` a zadejte správné údaje pro připojení k vaší databázi (host, jméno databáze, uživatelské jméno, heslo).
+
+4.  **Nastavení webového serveru**:
+    - Nakonfigurujte váš webový server (Apache, Nginx) tak, aby kořenový adresář webu směřoval do kořenového adresáře projektu nebo do adresáře `public/` (pokud používáte front controller pattern s přesměrováním).
+    - Ujistěte se, že máte na serveru nainstalované PHP a potřebná rozšíření (např. `mysqli`).
+
+5.  **Spuštění aplikace**:
+    - Otevřete webový prohlížeč a přejděte na URL vaší aplikace.
+
+----------------------------------------
+6. Databázové schéma (přehled)
+----------------------------------------
+Soubor `database.sql` obsahuje detailní definice tabulek. Klíčové tabulky pravděpodobně zahrnují:
+- `users`: Informace o uživatelích (ID, jméno, email, heslo, profilový obrázek atd.).
+- `activities`: Záznamy o cvičeních (ID, user_ID, typ, datum, délka, kalorie atd.).
+- `goals`: Fitness cíle uživatelů (ID, user_ID, popis, cílová hodnota, aktuální hodnota, termín atd.).
+(Toto je příklad, skutečná struktura je definována v `database.sql`)
+
+----------------------------------------
+7. Admin Panel
+----------------------------------------
+Admin panel je dostupný na adrese `/admin/` (např. `http://localhost/fitness-tracker/admin/`).
+Vyžaduje přihlášení administrátorským účtem.
+
+**Implementované funkce Admin Panelu:**
+- **Zabezpečení:**
+    - Přihlašovací systém pro administrátory (`login.php`, `authenticate.php`).
+    - Odhlášení (`logout.php`).
+    - Ochrana všech administrátorských stránek session-based autentizací (`auth_check.php`).
+- **Dashboard (`index.php`):**
+    - Základní uvítací stránka s navigací k hlavním modulům.
+- **Správa uživatelů (`users.php`):
+    - Zobrazení seznamu všech registrovaných uživatelů.
+    - Možnost úpravy detailů uživatele (`edit_user.php`), včetně:
+        - Osobních údajů (jméno, email, pohlaví, výška, váha, datum narození).
+        - Uživatelského typu (user/admin).
+        - Možnost změny hesla.
+    - Možnost smazání uživatele (`delete_user.php`), s ochranou proti smazání vlastního účtu.
+    - Zpětná vazba pro administrátora pomocí session zpráv (úspěch/chyba).
+- **Správa aktivit (`activities.php`):
+    - Zobrazení seznamu všech zaznamenaných tréninkových jednotek, včetně informace o uživateli.
+    - Zobrazení detailů konkrétní tréninkové jednotky (`activity_details.php`), včetně všech cviků a jejich parametrů (sety, opakování, váha, vzdálenost atd.).
+    - Možnost úpravy tréninkové jednotky (`edit_activity.php`):
+        - Úprava základních údajů o jednotce (datum, čas začátku/konce, poznámky, celková doba trvání, spálené kalorie).
+        - Úprava jednotlivých cviků v rámci jednotky.
+    - Možnost smazání tréninkové jednotky (`delete_activity.php`). Smazání jednotky odstraní i všechny k ní přiřazené cviky (transakčně).
+    - Zpětná vazba pro administrátora pomocí session zpráv.
+- **Nastavení aplikace (`settings.php`):
+    - Stránka je vytvořena jako placeholder pro budoucí globální nastavení aplikace.
+
+**Struktura souborů Admin Panelu:**
+- `/admin/index.php`: Dashboard.
+- `/admin/login.php`: Přihlašovací formulář.
+- `/admin/authenticate.php`: Logika pro ověření přihlášení.
+- `/admin/logout.php`: Skript pro odhlášení.
+- `/admin/auth_check.php`: Kontrola přihlášení pro zabezpečené stránky.
+- `/admin/users.php`: Seznam uživatelů.
+- `/admin/edit_user.php`: Formulář pro úpravu uživatele.
+- `/admin/update_user.php`: Logika pro aktualizaci uživatele.
+- `/admin/delete_user.php`: Logika pro smazání uživatele.
+- `/admin/activities.php`: Seznam aktivit.
+- `/admin/activity_details.php`: Detaily aktivity.
+- `/admin/edit_activity.php`: Formulář pro úpravu aktivity.
+- `/admin/update_activity.php`: Logika pro aktualizaci aktivity.
+- `/admin/delete_activity.php`: Logika pro smazání aktivity.
+- `/admin/settings.php`: Stránka pro nastavení aplikace.
+
+**Další plánovaný rozvoj Admin Panelu:**
+- Implementace konkrétních funkcí na stránce Nastavení aplikace.
+- Případné rozšíření dashboardu o statistiky a přehledy.
+
+----------------------------------------
+8. Možná budoucí vylepšení
+----------------------------------------
+- Rozšířené statistiky a vizualizace dat.
+- Integrace s nositelnými zařízeními.
+- Sociální funkce (sdílení pokroku, výzvy s přáteli).
+- Notifikace a připomínky.
+- Vícejazyčná podpora.
+- Pokročilejší systém správy cílů.
+- API pro mobilní aplikace.
+
+----------------------------------------
+9. Autoři
+----------------------------------------
+- Adam Přeček (a.precek.st@spseiostrava.cz)
+- Daniel Palovský (d.palovsky.st@spseiostrava.cz)
+- Richard Pokuta (r.pokuta.st@spseiostrava.cz)
+
+(Seznam může být doplněn nebo upraven dle skutečnosti.)
+
+----------------------------------------
+10. Licence
+----------------------------------------
+Tento projekt je licencován pod MIT licencí. Podrobnosti naleznete v souboru `LICENSE`.
+(Ověřte, zda soubor LICENSE existuje a odpovídá.)
+
+========================================
+Konec dokumentace
+========================================

@@ -13,6 +13,10 @@ Fitness Tracker je webová aplikace, která umožňuje uživatelům sledovat sv�
 - Nastavení a sledování fitness cílů
 - Statistiky cvičení
 - Nahrávání profilových obrázků
+- **Admin Panel**:
+  - Základní administrační rozhraní pro správu aplikace (dostupné na `/admin/`).
+  - V současné fázi obsahuje zástupné symboly pro správu uživatelů, aktivit a nastavení.
+  - **Důležité**: Admin panel momentálně nemá implementované zabezpečení. Je nutné ho doplnit před nasazením do produkčního prostředí.
 
 ## Technologie
 
