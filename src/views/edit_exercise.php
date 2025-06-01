@@ -10,15 +10,25 @@ $data = $_SESSION['exercise_data'] ?? [
 
 // Získání cviků z existujícího tréninku
 if (isset($exercise['exercises'])) {
-    $exercisesData = explode('||', $exercise['exercises']);
-    foreach ($exercisesData as $index => $exerciseData) {
-        list($name, $sets, $reps, $weight, $distance) = explode('|', $exerciseData);
+    $exerciseItems = explode('||', $exercise['exercises']);
+    foreach ($exerciseItems as $index => $item) {
+        $parts = explode('|', $item);
+        $name = $parts[0] ?? '';
+        $sets = $parts[1] ?? '';
+        $reps = $parts[2] ?? '';
+        $weight = $parts[3] ?? '';
+        $distance = $parts[4] ?? '';
+        $exerciseType = $parts[5] ?? '';
+        $individualExerciseId = $parts[6] ?? '';
+
         $data['exercises'][$index] = [
-            'exercise_id' => '', // Toto bude doplněno později
+            'exercise_id' => $individualExerciseId, // ID konkrétního cviku z individual_exercises
+            'name' => $name,         // Název cviku pro informaci
             'sets' => $sets,
             'reps' => $reps,
             'weight' => $weight,
-            'distance' => $distance
+            'distance' => $distance,
+            'exercise_type' => $exerciseType // Typ cviku pro logiku zobrazení
         ];
     }
 }
@@ -90,8 +100,28 @@ unset($_SESSION['exercise_errors']);
                     <span class="required-mark">*</span>
                 </label>
                 <div id="exercises-container">
-                    <?php foreach ($data['exercises'] as $index => $exercise): 
-                        $selectedExercise = $selectedExercises[$index] ?? null;
+                    <?php foreach ($data['exercises'] as $index => $currentDbExercise): 
+                        // Pokud máme data z databáze pro tento cvik (první načtení editačního formuláře)
+                        // a zároveň nemáme novější data ze session (po výběru cviku na select_exercise.php),
+                        // použijeme data z databáze.
+                        if (isset($currentDbExercise['exercise_id']) && !empty($currentDbExercise['exercise_id']) && !isset($selectedExercises[$index])) {
+                            $selectedExercise = [
+                                'id' => $currentDbExercise['exercise_id'],
+                                'name' => $currentDbExercise['name'] ?? 'Neznámý cvik',
+                                'description' => '', // Popis není v GROUP_CONCAT, můžeme ho případně načíst zvlášť
+                                'exercise_type' => $currentDbExercise['exercise_type'] ?? 'other',
+                                'sets' => $currentDbExercise['sets'] ?? '',
+                                'reps' => $currentDbExercise['reps'] ?? '',
+                                'weight' => $currentDbExercise['weight'] ?? '',
+                                'distance' => $currentDbExercise['distance'] ?? ''
+                            ];
+                        } elseif (isset($selectedExercises[$index])) {
+                            // Jinak použijeme data ze session (pokud existují) - typicky po výběru z select_exercise.php
+                            $selectedExercise = $selectedExercises[$index];
+                        } else {
+                            // Pojistka, pokud nemáme ani data z DB ani ze session pro tento index
+                            $selectedExercise = null;
+                        }
                     ?>
                     <div class="exercise-entry">
                         <div class="card-body">

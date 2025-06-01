@@ -84,6 +84,38 @@ include 'header.php';
                                     <i class="fas fa-fire text-danger me-1"></i>
                                     <?= $exercise['total_calories_burned'] ? $exercise['total_calories_burned'] . ' kcal' : 'N/A' ?>
                                 </span>
+                                
+                                <?php if (!empty($exercise['exercises'])): ?>
+                                    <div class="mt-2">
+                                        <strong><i class="fas fa-dumbbell text-primary me-1"></i>Cviky:</strong>
+                                        <ul class="list-unstyled small mt-1 mb-0">
+                                            <?php 
+                                            $exerciseItems = explode('||', $exercise['exercises']);
+                                            foreach ($exerciseItems as $item): 
+                                                if (empty($item)) continue;
+                                                $parts = explode('|', $item);
+                                                $name = $parts[0] ?? '';
+                                                $sets = $parts[1] ?? '';
+                                                $reps = $parts[2] ?? '';
+                                                $weight = $parts[3] ?? '';
+                                                $distance = $parts[4] ?? '';
+                                                $type = $parts[5] ?? '';
+                                            ?>
+                                                <li class="mb-1">
+                                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                                    <strong><?= htmlspecialchars($name) ?></strong>
+                                                    <?php if ($type == 'strength' || $type == 'silovy'): ?>
+                                                        <?= !empty($sets) ? $sets . ' × ' : '' ?>
+                                                        <?= !empty($reps) ? $reps . ' opak.' : '' ?>
+                                                        <?= !empty($weight) ? ' (' . $weight . ' kg)' : '' ?>
+                                                    <?php elseif ($type == 'cardio' || $type == 'kardio'): ?>
+                                                        <?= !empty($distance) ? $distance . ' km' : '' ?>
+                                                    <?php endif; ?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td>

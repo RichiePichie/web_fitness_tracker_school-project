@@ -59,8 +59,6 @@ foreach ($selectedExercises as $index => $exercise) {
             </div>
         </div>
         
-        <?php print_r($data);?>
-        
         <!-- Předání dat do JavaScriptu -->
         <script>
             const selectedExercises = <?php echo json_encode($selectedExercises); ?>;
@@ -68,8 +66,23 @@ foreach ($selectedExercises as $index => $exercise) {
         </script>
         
         <div class="training-body">
-            <form action="index.php" method="post" id="training-form" class="animate__animated animate__fadeIn">
-                <input type="hidden" name="action" value="save_training">
+            <form action="index.php?action=save_training" method="post" id="training-form" class="animate__animated animate__fadeIn">
+                <!-- Zobrazení obecných chyb -->
+                <?php if (isset($errors['general'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><?php echo $errors['general']; ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Zobrazení obecných chyb u cviků -->
+                <?php if (isset($errors['exercises']) && is_string($errors['exercises'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><?php echo $errors['exercises']; ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php endif; ?>
+                
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                 <!-- Datum tréninku -->
