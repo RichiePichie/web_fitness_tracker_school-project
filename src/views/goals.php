@@ -34,10 +34,9 @@ include 'header.php';
         <div class="row">
             <?php foreach ($goals as $goal): ?>
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card goal-card">
+                    <div class="card">
                         <div class="card-header goal-card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-bullseye me-2"></i>
                                 <?php echo htmlspecialchars($goal['title']); ?>
                             </h5>
                             <span class="goal-status-badge <?php echo $goal['status'] === 'completed' ? 'bg-success' : ($goal['status'] === 'failed' ? 'bg-danger' : 'bg-primary'); ?>">
@@ -134,14 +133,13 @@ include 'header.php';
                             </div>
                             
                             <div class="goal-actions d-flex justify-content-between">
-                                <a href="index.php?page=edit_goal&id=<?php echo $goal['id']; ?>" 
-                                   class="btn btn-primary btn-edit">
+                                <button class="btn btn-primary" onclick="window.location.href='index.php?page=edit_goal&id=<?php echo $goal['id']; ?>'">
                                     <i class="fas fa-edit me-2"></i>Upravit
-                                </a>
+                                </button>
                                 <form action="index.php?action=delete_goal" method="post" class="d-inline" 
                                       onsubmit="return confirm('Opravdu chcete smazat tento cíl?');">
                                     <input type="hidden" name="id" value="<?php echo $goal['id']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-delete">
+                                    <button type="submit" class="btn btn-danger">
                                         <i class="fas fa-trash-alt me-2"></i>Smazat
                                     </button>
                                 </form>

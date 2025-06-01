@@ -2882,6 +2882,7 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
 
 .goal-card-header {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius);
     color: white;
     padding: 1.25rem;
     border-bottom: none;
@@ -2919,6 +2920,7 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
     position: relative;
     z-index: 1;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--primary-color);
 }
 
 .goal-description {
@@ -2953,6 +2955,9 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
     font-size: 0.875rem;
     color: var(--text-muted);
     margin-bottom: 0.5rem;
+}
+.goal-info-label i{
+    padding-right: 0.5rem;
 }
 
 .goal-info-value {
