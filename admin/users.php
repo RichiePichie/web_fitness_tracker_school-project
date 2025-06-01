@@ -35,7 +35,7 @@ try {
             <li><a href="index.php">Dashboard</a></li>
             <li><a href="users.php">Manage Users</a></li>
             <li><a href="activities.php">Manage Activities</a></li>
-            <li><a href="settings.php">Settings</a></li>
+            <li><a href="manage_goals.php">Manage Goals</a></li>
             <li><a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['admin_username']); ?>)</a></li>
         </ul>
     </nav>
@@ -61,7 +61,7 @@ try {
             <?php if (empty($users) && !$error_message): ?>
                 <p>No users found.</p>
             <?php elseif (!$error_message): ?>
-                <table>
+                <table class="admin-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -89,8 +89,8 @@ try {
                                 <td><?php echo htmlspecialchars($user['date_of_birth'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($user['created_at']); ?></td>
                                 <td class="actions">
-                                    <a href="edit_user.php?id=<?php echo $user['id']; ?>">Edit</a>
-                                    <a href="delete_user.php?id=<?php echo $user['id']; ?>" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">Delete</a>
+                                    <a href="edit_user.php?id=<?php echo $user['id']; ?>" class="btn btn-small btn-edit">Edit</a>
+                                    <a href="delete_user.php?id=<?php echo $user['id']; ?>" class="btn btn-small btn-delete btn-danger" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

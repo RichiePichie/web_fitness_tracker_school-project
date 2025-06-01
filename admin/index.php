@@ -35,7 +35,7 @@ $pageTitle = "Admin Panel - Fitness Tracker";
             <li><a href="index.php">Dashboard</a></li>
             <li><a href="users.php">Manage Users</a></li>
             <li><a href="activities.php">Manage Activities</a></li>
-            <li><a href="settings.php">Settings</a></li>
+            <li><a href="manage_goals.php">Manage Goals</a></li>
             <li><a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['admin_username']); ?>)</a></li>
             <!-- Add more admin navigation links here -->
             <!-- <li><a href="users.php">Manage Users</a></li> -->
@@ -51,24 +51,7 @@ $pageTitle = "Admin Panel - Fitness Tracker";
             <h2>Welcome to the Admin Dashboard</h2>
             <p>This is the central hub for managing your Fitness Tracker application. From here, you can oversee various aspects of the site.</p>
 
-            <div class="feature-box">
-                <h3>User Management (Placeholder)</h3>
-                <p>Functionality to view, edit, and manage user accounts will be available here.</p>
-                <!-- <p><a href="users.php">Go to User Management</a></p> -->
-            </div>
-
-            <div class="feature-box">
-                <h3>Activity Data Overview (Placeholder)</h3>
-                <p>Insights and management tools for user-submitted fitness activities.</p>
-                <!-- <p><a href="activities.php">Go to Activity Management</a></p> -->
-            </div>
-
-            <div class="feature-box">
-                <h3>Application Settings (Placeholder)</h3>
-                <p>Configure site-wide settings and parameters.</p>
-                <!-- <p><a href="settings.php">Go to Settings</a></p> -->
-            </div>
-
+            <p>Welcome to the admin panel. Use the navigation to manage users and activities.</p>
             <p>More features will be added soon. Please check back for updates.</p>
         </div>
     </div>

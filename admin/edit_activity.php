@@ -36,7 +36,7 @@ try {
     // Fetch exercise entries for this session
     $stmt_exercises = $pdo->prepare(
         "SELECT tee.id as entry_id, tee.individual_exercise_id, ie.name as exercise_name, ie.exercise_type, 
-                tee.sets, tee.reps, tee.weight, tee.duration as exercise_duration, tee.distance, tee.calories_burned as exercise_calories
+                tee.sets, tee.reps, tee.weight, tee.duration as exercise_duration, tee.distance as distance, tee.calories_burned as exercise_calories
          FROM training_exercise_entries tee
          JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
          WHERE tee.training_session_id = :session_id

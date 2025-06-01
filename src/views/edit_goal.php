@@ -43,7 +43,7 @@ unset($_SESSION['goal_errors']);
 
         <div class="mb-3">
             <label for="target_value" class="form-label">Cílová hodnota *</label>
-            <input type="number" step="0.01" class="form-control <?php echo isset($errors['target_value']) ? 'is-invalid' : ''; ?>"
+            <input type="number" step="0.01" class="form-control <?php echo isset($errors['target_value']) ? 'is-invalid' : ''; ?>" min="0"
                    id="target_value" name="target_value" value="<?php echo htmlspecialchars($goal['target_value']); ?>" required>
             <?php if (isset($errors['target_value'])): ?>
                 <div class="invalid-feedback"><?php echo $errors['target_value']; ?></div>
@@ -52,7 +52,7 @@ unset($_SESSION['goal_errors']);
 
         <div class="mb-3">
             <label for="current_value" class="form-label">Aktuální hodnota</label>
-            <input type="number" step="0.01" class="form-control <?php echo isset($errors['current_value']) ? 'is-invalid' : ''; ?>"
+            <input type="number" step="0.01" class="form-control <?php echo isset($errors['current_value']) ? 'is-invalid' : ''; ?>" min="0"
                    id="current_value" name="current_value" value="<?php echo htmlspecialchars($goal['current_value']); ?>">
             <?php if (isset($errors['current_value'])): ?>
                 <div class="invalid-feedback"><?php echo $errors['current_value']; ?></div>
