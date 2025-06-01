@@ -81,7 +81,7 @@ try {
                                 <td><?php echo htmlspecialchars($goal['end_date'] ? date('d.m.Y', strtotime($goal['end_date'])) : 'N/A'); ?></td>
                                 <td class="actions">
                                     <a href="edit_goal_admin.php?id=<?php echo $goal['id']; ?>">Edit</a>
-                                    <a href="delete_goal_admin.php?id=<?php echo $goal['id']; ?>" onclick="return confirm('Are you sure you want to delete this goal?');">Delete</a>
+                                    <a href="delete_goal_admin.php?id=<?php echo $goal['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this goal?');">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

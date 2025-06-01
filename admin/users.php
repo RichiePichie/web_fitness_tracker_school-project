@@ -89,8 +89,8 @@ try {
                                 <td><?php echo htmlspecialchars($user['date_of_birth'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($user['created_at']); ?></td>
                                 <td class="actions">
-                                    <a href="edit_user.php?id=<?php echo $user['id']; ?>" class="btn btn-small btn-edit">Edit</a>
-                                    <a href="delete_user.php?id=<?php echo $user['id']; ?>" class="btn btn-small btn-delete btn-danger" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">Delete</a>
+                                    <a href="edit_user.php?id=<?php echo $user['id']; ?>">Edit</a>
+                                    <a href="delete_user.php?id=<?php echo $user['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

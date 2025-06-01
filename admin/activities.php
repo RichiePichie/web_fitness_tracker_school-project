@@ -54,7 +54,7 @@ try {
                 unset($_SESSION['activity_management_error']);
             }
             if (isset($_SESSION['activity_management_success'])) {
-                echo '<p class="success-message" style="color: green; border: 1px solid green; padding: 10px; margin-bottom: 20px; background-color: #e6ffe6; border-radius: 4px;">' . htmlspecialchars($_SESSION['activity_management_success']) . '</p>';
+                echo '<p class="success-message">' . htmlspecialchars($_SESSION['activity_management_success']) . '</p>';
                 unset($_SESSION['activity_management_success']);
             }
             ?>
@@ -91,9 +91,9 @@ try {
                                 <td class="notes-column"><?php echo nl2br(htmlspecialchars($activity['notes'] ?? 'N/A')); ?></td>
                                 <td><?php echo htmlspecialchars($activity['start_at']); ?></td>
                                 <td class="actions">
-                                    <a href="edit_activity.php?id=<?php echo $activity['id']; ?>" style="margin-right:10px;">Edit</a>
+                                    <a href="edit_activity.php?id=<?php echo $activity['id']; ?>">Edit</a>
                                     <a href="activity_details.php?id=<?php echo $activity['id']; ?>">Details</a>
-                                    <a href="delete_activity.php?id=<?php echo $activity['id']; ?>" onclick="return confirm('Are you sure you want to delete this activity session and all its entries? This action cannot be undone.');" style="color:red; margin-left:10px;">Delete</a>
+                                    <a href="delete_activity.php?id=<?php echo $activity['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this activity session and all its entries? This action cannot be undone.');">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

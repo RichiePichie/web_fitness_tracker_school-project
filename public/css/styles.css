@@ -76,8 +76,9 @@
 
 .admin-table th,
 .admin-table td {
-    padding: 1rem 1.5rem; /* Significantly increased padding for more spacing */
-    border-bottom: 1px solid var(--border-color);
+    border: 1px solid #ddd;
+    padding: 18px 25px; /* Further increased padding for more space */
+    text-align: left;
 }
 
 .admin-table tbody tr {
@@ -146,6 +147,28 @@
     background-color: rgba(var(--primary-rgb), 0.1);
     color: var(--primary-hover);
 }
+/* Flash Messages / Alerts */
+.success-message,
+.message.success {
+    color: var(--success-color);
+    background-color: rgba(var(--success-rgb), 0.1);
+    border: 1px solid var(--success-color);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-sm);
+}
+
+.error-message,
+.message.error {
+    color: var(--danger-color);
+    background-color: rgba(var(--danger-rgb), 0.1);
+    border: 1px solid var(--danger-color);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-sm);
+}
+
+/* Base Styles */
 
 @keyframes fadeIn {
     from {
@@ -189,7 +212,7 @@ body {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 2.5rem; /* Increased side padding */
 }
 
 a {

@@ -1,5 +1,9 @@
+<?php
+    // Determine theme based on cookie, default to 'light'
+    $currentTheme = $_COOKIE['theme'] ?? 'light';
+?>
 <!DOCTYPE html>
-<html lang="cs" data-theme="light">
+<html lang="cs" data-theme="<?php echo htmlspecialchars($currentTheme); ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
