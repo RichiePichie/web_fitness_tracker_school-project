@@ -34,39 +34,73 @@ include 'header.php';
         <div class="row">
             <?php foreach ($goals as $goal): ?>
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0"><?php echo htmlspecialchars($goal['title']); ?></h5>
-                            <span class="badge <?php echo $goal['status'] === 'completed' ? 'bg-success' : ($goal['status'] === 'failed' ? 'bg-danger' : 'bg-primary'); ?>">
+                    <div class="card goal-card">
+                        <div class="card-header goal-card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-bullseye me-2"></i>
+                                <?php echo htmlspecialchars($goal['title']); ?>
+                            </h5>
+                            <span class="goal-status-badge <?php echo $goal['status'] === 'completed' ? 'bg-success' : ($goal['status'] === 'failed' ? 'bg-danger' : 'bg-primary'); ?>">
+                                <i class="fas <?php echo $goal['status'] === 'completed' ? 'fa-check-circle' : ($goal['status'] === 'failed' ? 'fa-times-circle' : 'fa-clock'); ?> me-1"></i>
                                 <?php echo ucfirst($goal['status']); ?>
                             </span>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($goal['description'])): ?>
-                                <p class="mb-3"><?php echo htmlspecialchars($goal['description']); ?></p>
+                                <div class="goal-description mb-4">
+                                    <i class="fas fa-align-left text-muted me-2"></i>
+                                    <?php echo htmlspecialchars($goal['description']); ?>
+                                </div>
                             <?php endif; ?>
                             
-                            <div class="goal-info-row mb-2">
-                                <span class="goal-info-label"><i class="fas fa-tag me-2"></i>Typ:</span> 
-                                <span class="goal-info-value"><?php echo htmlspecialchars($goal['goal_type']); ?></span>
-                            </div>
-                            
-                            <div class="goal-info-row mb-2">
-                                <span class="goal-info-label"><i class="fas fa-bullseye me-2"></i>Cílová hodnota:</span> 
-                                <span class="goal-info-value"><?php echo htmlspecialchars($goal['target_value']); ?></span>
-                            </div>
-                            
-                            <div class="goal-info-row mb-2">
-                                <span class="goal-info-label"><i class="fas fa-chart-line me-2"></i>Aktuální hodnota:</span> 
-                                <span class="goal-info-value"><?php echo htmlspecialchars($goal['current_value']); ?></span>
-                            </div>
-                            
-                            <div class="goal-info-row mb-3">
-                                <span class="goal-info-label"><i class="fas fa-calendar-alt me-2"></i>Období:</span> 
-                                <span class="goal-info-value">
-                                    <?php echo date('d.m.Y', strtotime($goal['start_date'])); ?> - 
-                                    <?php echo date('d.m.Y', strtotime($goal['end_date'])); ?>
-                                </span>
+                            <div class="goal-info-grid">
+                                <div class="goal-info-item">
+                                    <div class="goal-info-label">
+                                        <i class="fas fa-tag text-primary me-2"></i>Typ cíle
+                                    </div>
+                                    <div class="goal-info-value">
+                                        <?php 
+                                        $typeIcons = [
+                                            'weight' => 'fa-weight',
+                                            'distance' => 'fa-running',
+                                            'workout_count' => 'fa-calendar-check',
+                                            'strength' => 'fa-dumbbell',
+                                            'other' => 'fa-star'
+                                        ];
+                                        $icon = $typeIcons[$goal['goal_type']] ?? 'fa-tag';
+                                        ?>
+                                        <i class="fas <?php echo $icon; ?> me-2"></i>
+                                        <?php echo htmlspecialchars($goal['goal_type']); ?>
+                                    </div>
+                                </div>
+                                
+                                <div class="goal-info-item">
+                                    <div class="goal-info-label">
+                                        <i class="fas fa-bullseye text-danger me-2"></i>Cílová hodnota
+                                    </div>
+                                    <div class="goal-info-value">
+                                        <?php echo htmlspecialchars($goal['target_value']); ?> jednotek
+                                    </div>
+                                </div>
+                                
+                                <div class="goal-info-item">
+                                    <div class="goal-info-label">
+                                        <i class="fas fa-chart-line text-success me-2"></i>Aktuální hodnota
+                                    </div>
+                                    <div class="goal-info-value">
+                                        <?php echo htmlspecialchars($goal['current_value']); ?> jednotek
+                                    </div>
+                                </div>
+                                
+                                <div class="goal-info-item">
+                                    <div class="goal-info-label">
+                                        <i class="fas fa-calendar-alt text-info me-2"></i>Období
+                                    </div>
+                                    <div class="goal-info-value">
+                                        <?php echo date('d.m.Y', strtotime($goal['start_date'])); ?> - 
+                                        <?php echo date('d.m.Y', strtotime($goal['end_date'])); ?>
+                                    </div>
+                                </div>
                             </div>
                             
                             <?php
@@ -76,33 +110,38 @@ include 'header.php';
                             }
                             $progress = min(100, max(0, $progress));
                             $roundedProgress = round($progress);
+                            $progressColor = $progress >= 100 ? 'success' : ($progress >= 75 ? 'primary' : ($progress >= 50 ? 'info' : ($progress >= 25 ? 'warning' : 'danger')));
                             ?>
                             
                             <div class="progress-container mb-4">
+                                <div class="progress-label d-flex justify-content-between align-items-center mb-2">
+                                    <span class="progress-title">
+                                        <i class="fas fa-chart-pie me-2"></i>Pokrok
+                                    </span>
+                                    <span class="progress-percentage">
+                                        <?php echo $roundedProgress; ?>%
+                                    </span>
+                                </div>
                                 <div class="progress">
-                                    <div class="progress-bar" role="progressbar" 
+                                    <div class="progress-bar bg-<?php echo $progressColor; ?>" 
+                                         role="progressbar" 
                                          style="width: <?php echo $progress; ?>%;" 
                                          aria-valuenow="<?php echo $progress; ?>" 
                                          aria-valuemin="0" 
                                          aria-valuemax="100">
                                     </div>
                                 </div>
-                                <div class="progress-info mt-2">
-                                    <span class="progress-percentage">
-                                        <i class="fas fa-chart-pie me-1"></i> <?php echo $roundedProgress; ?>%
-                                    </span>
-                                </div>
                             </div>
                             
-                            <div class="d-flex justify-content-between">
+                            <div class="goal-actions d-flex justify-content-between">
                                 <a href="index.php?page=edit_goal&id=<?php echo $goal['id']; ?>" 
-                                   class="btn btn-primary">
+                                   class="btn btn-primary btn-edit">
                                     <i class="fas fa-edit me-2"></i>Upravit
                                 </a>
-                                <form action="index.php?page=delete_goal" method="post" class="d-inline" 
+                                <form action="index.php?action=delete_goal" method="post" class="d-inline" 
                                       onsubmit="return confirm('Opravdu chcete smazat tento cíl?');">
                                     <input type="hidden" name="id" value="<?php echo $goal['id']; ?>">
-                                    <button type="submit" class="btn btn-danger">
+                                    <button type="submit" class="btn btn-danger btn-delete">
                                         <i class="fas fa-trash-alt me-2"></i>Smazat
                                     </button>
                                 </form>
