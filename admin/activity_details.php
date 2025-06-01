@@ -136,7 +136,9 @@ try {
                                     <th>Sets</th>
                                     <th>Reps</th>
                                     <th>Weight (kg)</th>
+                                    <th>Duration (min)</th>
                                     <th>Distance (km)</th>
+                                    <th>Calories Burned</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -147,7 +149,9 @@ try {
                                         <td><?php echo htmlspecialchars($entry['sets'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($entry['reps'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($entry['weight'] ?? 'N/A'); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['duration'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($entry['distance'] ?? 'N/A'); ?></td>
+                                        <td><?php echo htmlspecialchars($entry['calories_burned'] ?? 'N/A'); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

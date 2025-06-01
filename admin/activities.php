@@ -39,7 +39,7 @@ try {
             <li><a href="index.php">Dashboard</a></li>
             <li><a href="users.php">Manage Users</a></li>
             <li><a href="activities.php">Manage Activities</a></li>
-            <li><a href="settings.php">Settings</a></li>
+            <li><a href="manage_goals.php">Manage Goals</a></li>
             <li><a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['admin_username']); ?>)</a></li>
         </ul>
     </nav>
@@ -65,7 +65,7 @@ try {
             <?php if (empty($activities) && !$error_message): ?>
                 <p>No activities found.</p>
             <?php elseif (!$error_message): ?>
-                <table>
+                <table class="admin-table">
                     <thead>
                         <tr>
                             <th>ID</th>

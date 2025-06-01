@@ -52,6 +52,99 @@
 
 .text-danger { color: var(--danger-color); }
 
+/* Admin Panel Specific Styles */
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden; /* Ensures border-radius is respected by child elements like thead */
+    background-color: var(--card-bg);
+}
+
+.admin-table thead tr {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    text-align: left;
+    font-weight: bold;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 1rem 1.5rem; /* Significantly increased padding for more spacing */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:nth-of-type(even) {
+    background-color: var(--card-bg-2); /* Zebra striping for even rows */
+}
+
+.admin-table tbody tr:hover {
+    background-color: rgba(var(--primary-rgb), 0.05); /* Subtle hover effect */
+}
+
+.admin-table tbody tr:last-of-type td {
+    border-bottom: none; /* Remove border from last row's cells */
+}
+
+.admin-table .actions a {
+    color: var(--primary-color);
+    margin-right: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.admin-table .actions a:hover {
+    border-color: var(--primary-hover);
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-hover);
+}
+
+.admin-table .actions a.delete-btn,
+.admin-table .actions button.delete-btn {
+    color: var(--danger-color);
+}
+
+.admin-table .actions a.delete-btn:hover,
+.admin-table .actions button.delete-btn:hover {
+    border-color: var(--danger-color);
+    background-color: rgba(var(--danger-rgb), 0.1);
+    color: var(--danger-color);
+}
+
+/* Ensure action buttons are styled consistently if they are actual buttons */
+.admin-table .actions button {
+    background: none;
+    border: 1px solid transparent;
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: inherit; /* Match link font size */
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.admin-table .actions button.edit-btn {
+    color: var(--primary-color);
+}
+.admin-table .actions button.edit-btn:hover {
+    border-color: var(--primary-hover);
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-hover);
+}
+
 /* Base Styles */
 
 @keyframes fadeIn {
