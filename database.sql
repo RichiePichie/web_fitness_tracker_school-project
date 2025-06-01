@@ -1,101 +1,106 @@
--- Vytvoření databáze (pokud ještě neexistuje)
-CREATE DATABASE IF NOT EXISTS `fitness_tracker_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci;
-USE `fitness_tracker_db`;
+-- Vytvoření databáze
+CREATE DATABASE IF NOT EXISTS fitness_tracker;
+USE fitness_tracker;
 
--- Tabulka Uzivatele
-CREATE TABLE `Uzivatele` (
-  `id_uzivatele` INT AUTO_INCREMENT PRIMARY KEY,
-  `jmeno_uzivatele` VARCHAR(50) NOT NULL UNIQUE,
-  `heslo_hash` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(100) NOT NULL UNIQUE,
-  `typ_uzivatele` ENUM('bezny', 'admin') NOT NULL DEFAULT 'bezny',
-  `datum_registrace` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `posledni_prihlaseni` TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+-- Tabulka uživatelů
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    user_type ENUM('user', 'admin') NOT NULL DEFAULT 'user',
+    gender ENUM('male', 'female','other') NOT NULL,
+    height DECIMAL(5,2) DEFAULT NULL,
+    weight DECIMAL(5,2) DEFAULT NULL,
+    date_of_birth DATE DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
--- Tabulka Treninky
-CREATE TABLE `Treninky` (
-  `id_treninku` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_uzivatele` INT NOT NULL,
-  `nazev_treninku` VARCHAR(100) NOT NULL,
-  `datum_treninku` DATE NOT NULL,
-  `cas_zacatku` TIME NULL,
-  `doba_trvani_celkem_min` INT NULL,
-  `poznamky_k_treninku` TEXT NULL,
-  `vytvoreno_kdy` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `upraveno_kdy` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (`id_uzivatele`) REFERENCES `Uzivatele`(`id_uzivatele`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+-- Tabulka jednotlivých cviků (definice)
+CREATE TABLE IF NOT EXISTS individual_exercises (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    exercise_type ENUM('cardio', 'strength', 'flexibility', 'balance', 'other') NOT NULL
+);
 
--- Tabulka Cviky
-CREATE TABLE `Cviky` (
-  `id_cviku` INT AUTO_INCREMENT PRIMARY KEY,
-  `nazev_cviku` VARCHAR(100) NOT NULL UNIQUE,
-  `popis_cviku` TEXT,
-  `svalova_partie` VARCHAR(255),
-  `typ_cviku` ENUM('silovy', 'kardio', 'strecing', 'intervalovy', 'ostatni') NOT NULL DEFAULT 'ostatni'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+-- Tabulka tréninkových jednotek (konkrétní trénink)
+CREATE TABLE IF NOT EXISTS training_sessions (
+    id INT AUTO_INCREMENT NOT NULL primary key,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    total_duration INT, -- Celková délka tréninku v minutách
+    total_calories_burned INT, -- Celkové spálené kalorie za trénink
+    notes TEXT,
+    start_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
--- Tabulka Treninkove_Cviky
-CREATE TABLE `Treninkove_Cviky` (
-  `id_treninkoveho_cviku` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_treninku` INT NOT NULL,
-  `id_cviku` INT NOT NULL,
-  `poradi_cviku` INT NULL,
-  `serie` INT NULL,
-  `opakovani` VARCHAR(50) NULL,
-  `vaha_kg` DECIMAL(6,2) NULL,
-  `doba_trvani_min` INT NULL,
-  `vzdalenost_km` DECIMAL(6,2) NULL,
-  `poznamky_cviku` TEXT NULL,
-  FOREIGN KEY (`id_treninku`) REFERENCES `Treninky`(`id_treninku`) ON DELETE CASCADE,
-  FOREIGN KEY (`id_cviku`) REFERENCES `Cviky`(`id_cviku`) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+-- Propojovací tabulka mezi tréninkovými jednotkami a jednotlivými cviky (konkrétní provedení cviku v tréninku)
+CREATE TABLE IF NOT EXISTS training_exercise_entries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    training_session_id INT NOT NULL,
+    individual_exercise_id INT NOT NULL,
+    sets INT, -- Počet sérií (pro strength)
+    reps INT, -- Počet opakování na sérii (pro strength)
+    weight DECIMAL(5,2), -- Použitá váha (pro strength)
+    distance DECIMAL(10,2), -- Uražená vzdálenost (pro cardio)
+    FOREIGN KEY (training_session_id) REFERENCES training_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (individual_exercise_id) REFERENCES individual_exercises(id) ON DELETE CASCADE
+);
 
--- Vkládání ukázkových dat:
+-- Tabulka cílů uživatele
+CREATE TABLE IF NOT EXISTS user_goals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    goal_type ENUM('weight', 'exercise_frequency', 'duration', 'distance', 'other') NOT NULL,
+    target_value DECIMAL(10,2) NOT NULL,
+    current_value DECIMAL(10,2) DEFAULT 0,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    status ENUM('active', 'completed', 'failed', 'cancelled') DEFAULT 'active',
+    individual_exercise_id INT DEFAULT NULL, -- Volitelné propojení s konkrétním cvikem
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (individual_exercise_id) REFERENCES individual_exercises(id) ON DELETE SET NULL
+);
 
--- Uživatelé (heslo 'heslo123' - nutno hashovat v aplikaci! např. password_hash('heslo123', PASSWORD_DEFAULT))
-INSERT INTO `Uzivatele` (`jmeno_uzivatele`, `heslo_hash`, `email`, `typ_uzivatele`) VALUES
-('testUser', '$2y$10$examplehash1forTestUser123', 'user@example.com', 'bezny'),
-('adminUser', '$2y$10$examplehash2forAdminUser456', 'admin@example.com', 'admin');
+-- Přidání testovacích dat pro individual_exercises
+/*INSERT INTO individual_exercises (name, description, exercise_type) VALUES
+('Klik', 'Klasický klik na zemi', 'strength'),
+('Dřep s vlastní vahou', 'Dřep bez závaží', 'strength'),
+('Běh', 'Běh venku nebo na pásu', 'cardio'),
+('Jízda na kole', 'Cyklistika venku nebo na trenažeru', 'cardio'),
+('Pozdrav slunci A', 'Základní sekvence jógy', 'flexibility'),
+('Prkno', 'Statické cvičení na střed těla', 'strength');
 
--- Cviky (katalog)
-INSERT INTO `Cviky` (`nazev_cviku`, `popis_cviku`, `svalova_partie`, `typ_cviku`) VALUES
-('Bench Press', 'Tlak s velkou činkou vleže na rovné lavici.', 'Hrudník, Triceps, Ramena', 'silovy'),
-('Dřep s vlastní vahou', 'Základní dřep bez přidané zátěže.', 'Nohy, Hýždě', 'silovy'),
-('Mrtvý tah', 'Zvedání velké činky ze země do vzpřímeného postoje.', 'Záda, Nohy, Hýždě', 'silovy'),
-('Shyby nadhmatem', 'Přitahování těla k hrazdě nadhmatem.', 'Záda, Biceps', 'silovy'),
-('Kliky na bradlech', 'Tlaky na bradlech pro hrudník a triceps.', 'Hrudník, Triceps', 'silovy'),
-('Běh na páse', 'Vytrvalostní běh na běžeckém trenažéru.', 'Kardio, Nohy', 'kardio'),
-('Jízda na rotopedu', 'Vytrvalostní jízda na stacionárním kole.', 'Kardio, Nohy', 'kardio'),
-('Angličáky (Burpees)', 'Komplexní cvik zapojující celé tělo.', 'Celé tělo', 'intervalovy'),
-('Protažení hamstringů (předklon)', 'Statické protažení zadní strany stehen.', 'Hamstringy', 'strecing'),
-('Plank (Prkno)', 'Statická výdrž pro posílení středu těla.', 'Střed těla (Core)', 'silovy'),
-('Kliky', 'Základní cvik s vlastní vahou na horní část těla.', 'Hrudník, Triceps, Ramena', 'silovy'),
-('Výpady', 'Cvik na nohy a hýždě, s vlastní vahou nebo zátěží.', 'Nohy, Hýždě', 'silovy'),
-('Skákání přes švihadlo', 'Kardio cvičení zlepšující koordinaci a výdrž.', 'Kardio, Lýtka', 'kardio'),
-('Jóga - Pozdrav slunci', 'Sestava plynulých jógových pozic.', 'Celé tělo', 'strecing');
+-- Přidání testovacích dat pro training_sessions (původní data upravena)
+-- Předpokládáme, že uživatelé s id 1, 2, 3, 4, 5 existují
+INSERT INTO training_sessions (user_id, date, total_duration, total_calories_burned, notes) VALUES
+(1, '2025-03-15', 60, 550, 'Ranní trénink - běh a posilování'),
+(1, '2025-03-16', 45, 250, 'Večerní jóga session'),
+(2, '2025-03-15', 75, 400, 'Ranní kardio a posilování');
 
--- Tréninky (příklady)
-INSERT INTO `Treninky` (`id_uzivatele`, `nazev_treninku`, `datum_treninku`, `cas_zacatku`, `doba_trvani_celkem_min`, `poznamky_k_treninku`) VALUES
-(1, 'Ranní posilovna - Full Body', '2025-05-30', '08:00:00', 90, 'První trénink po delší pauze.'),
-(1, 'Večerní běh v parku', '2025-05-30', '19:30:00', 45, 'Příjemné počasí, lehký běh.'),
-(2, 'Odpolední kardio a strečink', '2025-05-31', '15:00:00', 60, 'Kombinace rotopedu a jógy.');
+-- Přidání testovacích dat pro training_exercise_entries
+-- Předpokládáme, že individual_exercises s id 1 (Klik), 3 (Běh), 5 (Pozdrav slunci A) existují
+-- Odkazujeme na training_sessions vytvořené výše
+INSERT INTO training_exercise_entries (training_session_id, individual_exercise_id, sets, reps, duration, distance, calories_burned) VALUES
+(1, 3, NULL, NULL, 30, 5.0, 300), -- Běh v tréninku 1
+(1, 1, 3, 15, NULL, NULL, 100), -- Kliky v tréninku 1
+(1, 6, 3, 60, NULL, NULL, 150), -- Prkno v tréninku 1
+(2, 5, NULL, NULL, 45, NULL, 250), -- Pozdrav slunci A v tréninku 2
+(3, 3, NULL, NULL, 40, 6.5, 350), -- Běh v tréninku 3
+(3, 2, 4, 12, NULL, NULL, 50); -- Dřepy v tréninku 3
 
--- Cviky v trénincích (příklady)
--- Trénink 1 (Full Body, id_treninku = 1)
-INSERT INTO `Treninkove_Cviky` (`id_treninku`, `id_cviku`, `poradi_cviku`, `serie`, `opakovani`, `vaha_kg`, `poznamky_cviku`) VALUES
-(1, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Dřep s vlastní vahou'), 1, 3, '15', NULL, 'Zahřátí'),
-(1, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Bench Press'), 2, 4, '8-10', 60.00, 'Postupně zvyšovat váhu'),
-(1, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Mrtvý tah'), 3, 1, '5', 80.00, 'Těžká série, důraz na techniku'),
-(1, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Shyby nadhmatem'), 4, 3, 'Max', NULL, 'Do selhání'),
-(1, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Plank (Prkno)'), 5, 3, '60s', NULL, 'Držet 60 sekund');
-
--- Trénink 2 (Běh, id_treninku = 2)
-INSERT INTO `Treninkove_Cviky` (`id_treninku`, `id_cviku`, `poradi_cviku`, `doba_trvani_min`, `vzdalenost_km`, `poznamky_cviku`) VALUES
-(2, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Běh na páse'), 1, 40, 5.5, 'Konstantní tempo');
-
--- Trénink 3 (Kardio a strečink, id_treninku = 3)
-INSERT INTO `Treninkove_Cviky` (`id_treninku`, `id_cviku`, `poradi_cviku`, `doba_trvani_min`, `poznamky_cviku`) VALUES
-(3, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Jízda na rotopedu'), 1, 30, 'Střední zátěž'),
-(3, (SELECT id_cviku FROM Cviky WHERE nazev_cviku = 'Jóga - Pozdrav slunci'), 2, 25, 'Pomalé a plynulé protažení');
+-- Přidání testovacích dat pro user_goals (původní data upravena)
+-- Předpokládáme, že individual_exercises s id 1 (Klik), 3 (Běh) existují
+INSERT INTO user_goals (user_id, title, description, goal_type, target_value, current_value, start_date, end_date, individual_exercise_id, status) VALUES
+(1, 'Zhubnout 5 kg', 'Cílem je dosáhnout váhy 70 kg', 'weight', 70.00, 75.00, '2025-03-01', '2025-05-01', NULL, 'active'),
+(1, 'Běhat 3x týdně', 'Pravidelně absolvovat 3 běhy týdně', 'exercise_frequency', 3.00, 1.00, '2025-03-01', '2025-04-01', 3, 'active'), -- Cíl vázaný na běh (id 3)
+(2, 'Kardio 150 min/týden', 'Zlepšit kardio kondici celkovou délkou kardio aktivit', 'duration', 150.00, 60.00, '2025-03-01', '2025-04-15', NULL, 'active'),
+(1, 'Udělat 50 kliků v kuse', 'Cíl vázaný na konkrétní výkon v cviku', 'specific_exercise', 50.00, 30.00, '2025-03-01', '2025-06-01', 1, 'active'); -- Cíl vázaný na kliky (id 1)
