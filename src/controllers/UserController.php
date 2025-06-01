@@ -161,10 +161,7 @@ class UserController {
                     
                     // Uložení chyb a dat do session
                     $_SESSION['login_errors'] = $errors;
-                    $_SESSION['login_form_data'] = [
-                        'email' => $email,
-                        'remember' => $remember
-                    ];
+                    $_SESSION['login_form_data'] = $email;
                     
                     header('Location: index.php?page=login');
                     exit;
