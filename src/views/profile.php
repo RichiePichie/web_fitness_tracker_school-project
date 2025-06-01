@@ -10,7 +10,7 @@ unset($_SESSION['register_errors']);
 
 <div class="container profile">
     <section class="card">
-        <h2 class="mb-4">Můj profil</h2>
+        <h2>Můj profil</h2>
 
         <?php print_r($_SESSION);?>
 
@@ -39,12 +39,11 @@ unset($_SESSION['register_errors']);
                 <h3>Osobní informace</h3>
                 <div class="form-group">
                     <label for="height">Výška (cm)</label>
-                    <input type="number" step="0.01" name="height" id="height"
-										value="<?= htmlspecialchars($user['height'] ?? '') ?>">
+                    <input type="number" step="0.01" name="height" id="height" value="<?= htmlspecialchars($user['height'] ?? '') ?>">
                 </div>
                 <div class="form-group">
                     <label for="weight">Váha (kg)</label>
-                    <input type="number" step="0.1" name="weight" id="weight"
+                    <input type="number" step="0.01" name="weight" id="weight"
                            value="<?= htmlspecialchars($user['weight'] ?? '') ?>">
                 </div>
                 <div class="form-group">
@@ -74,11 +73,11 @@ unset($_SESSION['register_errors']);
                 </div>
                 <div class="form-group">
                     <label for="new_password">Nové heslo</label>
-                    <input type="password" name="new_password" id="new_password" minlength="8">
+                    <input type="password" name="new_password" id="new_password" minlength="6">
                 </div>
                 <div class="form-group">
                     <label for="confirm_password">Potvrzení hesla</label>
-                    <input type="password" name="confirm_password" id="confirm_password" minlength="8">
+                    <input type="password" name="confirm_password" id="confirm_password" minlength="6">
                 </div>
             </div>
 
@@ -91,9 +90,6 @@ unset($_SESSION['register_errors']);
 
 <style>
 
-.profile .card:hover {
-    transform: none;
-}
 .profile-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

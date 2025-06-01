@@ -112,9 +112,7 @@ include 'src/views/header.php';
             </div>
             <p class="testimonial-text">Fitness Tracker mi pomohl pravidelně cvičit a sledovat svůj pokrok. Díky přehledným statistikám vím, na čem musím zapracovat.</p>
             <div class="testimonial-author">
-                <div class="testimonial-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img class="testimonial-avatar" src="public/images/Jan_novak.jpg" alt="Avatar">
                 <div class="testimonial-info">
                     <h4>Jan Novák</h4>
                     <p>Aktivní uživatel, 3 měsíce</p>
@@ -128,9 +126,7 @@ include 'src/views/header.php';
             </div>
             <p class="testimonial-text">Stanovení cílů a jejich sledování mě motivuje k lepším výkonům. Aplikace je jednoduchá a přehledná, přesně to jsem hledala.</p>
             <div class="testimonial-author">
-                <div class="testimonial-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img class="testimonial-avatar" src="public/images/Petra_svobodova.jpg" alt="Avatar">
                 <div class="testimonial-info">
                     <h4>Petra Svobodová</h4>
                     <p>Aktivní uživatelka, 6 měsíců</p>
@@ -144,9 +140,7 @@ include 'src/views/header.php';
             </div>
             <p class="testimonial-text">Nejlepší aplikace pro sledování cvičení, kterou jsem kdy používal. Díky ní jsem si vytvořil pravidelný návyk cvičení.</p>
             <div class="testimonial-author">
-                <div class="testimonial-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img class="testimonial-avatar" src="public/images/Martin_cerny.jpg" alt="Avatar">
                 <div class="testimonial-info">
                     <h4>Martin Černý</h4>
                     <p>Aktivní uživatel, 1 rok</p>

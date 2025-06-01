@@ -59,9 +59,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Zobrazení stránek
-if ($page === 'login') {
+if ($page === 'login' ) {
+    if (isset($_SESSION['user_id'])) {
+        header('Location: index.php?page=dashboard');
+        exit();
+    }
     include __DIR__ . '/src/views/login.php';
 } elseif ($page === 'register') {
+    if (isset($_SESSION['user_id'])) {
+        header('Location: index.php?page=dashboard');
+        exit();
+    }
     include __DIR__ . '/src/views/register.php';
 } elseif ($page === 'profile' && isset($_SESSION['user_id'])) {
     $userController = new UserController(new User($pdo));

@@ -3,7 +3,7 @@ include 'header.php';
 ?>
 
 <div class="container mt-4">
-    <h1>Moje cvičení</h1>
+    <h2>Moje cvičení</h2>
     
     <?php if (isset($_SESSION['exercise_added']) && $_SESSION['exercise_added']): ?>
         <div class="alert alert-success">
@@ -25,16 +25,15 @@ include 'header.php';
         </div>
         <?php unset($_SESSION['exercise_deleted']); ?>
     <?php endif; ?>
-
-    <div class="mb-3">
-        <a href="index.php?page=add_exercise" class="btn btn-primary">Přidat nové cvičení</a>
-    </div>
-
+    
     <?php if (empty($exercises)): ?>
         <div class="alert alert-info">
             Zatím nemáte žádná zaznamenaná cvičení.
         </div>
     <?php else: ?>
+
+    
+
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -70,6 +69,9 @@ include 'header.php';
             </table>
         </div>
     <?php endif; ?>
+    <div class="mb-3">
+        <a href="index.php?page=add_exercise" class="btn primary-btn">Přidat nové cvičení</a>
+    </div>
 </div>
 
 <?php

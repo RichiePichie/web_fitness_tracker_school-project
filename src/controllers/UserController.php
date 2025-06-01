@@ -21,35 +21,50 @@ class UserController {
             
             $errors = [];
             
-            // Validace vstupu
+            // Validace uživatelského jména
+            if (empty($username)) {
+                $errors['username'] = 'Uživatelské jméno je povinné';
+            } elseif (strlen($username) > 50) {
+                $errors['username'] = 'Uživatelské jméno může mít maximálně 50 znaků';
+            } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+                $errors['username'] = 'Uživatelské jméno může obsahovat pouze písmena, čísla a podtržítko';
+            } elseif ($this->userModel->usernameExists($username)) {
+                $errors['username'] = 'Toto uživatelské jméno je již zabrané';
+            }
+
+            // Validace emailu
             if (empty($email)) {
                 $errors['email'] = 'Email je povinný';
+            } elseif (strlen($email) > 100) {
+                $errors['email'] = 'Email může mít maximálně 100 znaků';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors['email'] = 'Neplatný email';
+                $errors['email'] = 'Neplatný formát emailu';
             } elseif ($this->userModel->emailExists($email)) {
                 $errors['email'] = 'Účet s tímto emailem již existuje';
             }
-
-            if (empty($username)) {
-                $errors['username'] = 'Uživatelské jméno je povinné';
-            } elseif ($this->userModel->usernameExists($email)) {
-                $errors['username'] = 'Toto uživatelské jméno je již zabrané';
-            }
             
+            // Validace hesla
             if (empty($password)) {
                 $errors['password'] = 'Heslo je povinné';
             } elseif (strlen($password) < 6) {
                 $errors['password'] = 'Heslo musí mít alespoň 6 znaků';
+            } elseif (strlen($password) > 255) {
+                $errors['password'] = 'Heslo je příliš dlouhé';
             }
             
+            // Validace potvrzení hesla
             if ($password !== $passwordConfirm) {
                 $errors['password_confirm'] = 'Hesla se neshodují';
             }
             
+            // Validace pohlaví
             if (empty($gender)) {
                 $errors['gender'] = 'Pohlaví je povinné';
+            } elseif (!in_array($gender, ['male', 'female', 'other'])) {
+                $errors['gender'] = 'Neplatná hodnota pohlaví';
             }
             
+            // Validace souhlasu s podmínkami
             if (!$terms) {
                 $errors['terms'] = 'Musíte souhlasit s podmínkami';
             }
@@ -106,29 +121,34 @@ class UserController {
             $password = $_POST['password'] ?? '';
             $remember = isset($_POST['remember']) ? true : false;
             
-            // Debug - log the POST data
-            error_log("Login POST data: " . print_r($_POST, true));
-            
             $errors = [];
             
-            // Validace vstupu
+            // Validace emailu
             if (empty($email)) {
                 $errors['email'] = 'Email je povinný';
+            } elseif (strlen($email) > 100) {
+                $errors['email'] = 'Email může mít maximálně 100 znaků';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors['email'] = 'Neplatný email';
+                $errors['email'] = 'Neplatný formát emailu';
             }
             
+            // Validace hesla
             if (empty($password)) {
                 $errors['password'] = 'Heslo je povinné';
+            } elseif (strlen($password) > 255) {
+                $errors['password'] = 'Heslo je příliš dlouhé';
             }
             
             if (empty($errors)) {
-                // Debug - log the data being passed to the model
-                error_log("Attempting to login user: $email");
-                
                 $user = $this->userModel->login($email, $password);
                 
                 if ($user) {
+                    // Vyčištění session před nastavením nových dat
+                    unset($_SESSION['login_errors']);
+                    unset($_SESSION['login_form_data']);
+                    unset($_SESSION['login_email']);
+                    
+                    // Nastavení session dat
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['user_type'] = $user['user_type'];
@@ -159,7 +179,7 @@ class UserController {
                     $errors['general'] = 'Neplatný email nebo heslo';
                     error_log("Login failed for email: $email");
                     
-                    // Uložíme chyby a email do session
+                    // Uložení chyb a dat do session
                     $_SESSION['login_errors'] = $errors;
                     $_SESSION['login_form_data'] = [
                         'email' => $email,
@@ -170,9 +190,12 @@ class UserController {
                     exit;
                 }
             } else {
-                // Uložíme chyby a data do session
+                // Uložení chyb a dat do session
                 $_SESSION['login_errors'] = $errors;
-                $_SESSION['login_email'] = $email;
+                $_SESSION['login_form_data'] = [
+                    'email' => $email,
+                    'remember' => $remember
+                ];
                 
                 header('Location: index.php?page=login');
                 exit;
@@ -207,99 +230,131 @@ class UserController {
             $passwordNew = $_POST['new_password'] ?? '';
             $passwordConfirm = $_POST['confirm_password'] ?? '';
             
-						$user = $this->userModel->getById($userId);
+            $user = $this->userModel->getById($userId);
 
             $errors = [];
 
-						if(!is_nan($height)) {
-							$errors['height'] = 'Výška musí být číslo '. $height;
-						}elseif($height < 50 || $height > 250) {
-							$errors['height'] = 'Výška musí být mezi 50 a 250 cm';
-						}elseif($user['height'] != $height){
-							$height = round($height, 2);
-							$data['height'] = $height;
-						}
-
-						if(!is_nan($weight)) {
-							$errors['weight'] = 'Váha musí být číslo';
-						}elseif($weight < 20 || $weight > 500) {
-							$errors['weight'] = 'Váha musí být mezi 20 a 500 kg';
-						}elseif($user['weight'] != $weight){
-							$weight = round($weight, 2);
-							$data['weight'] = $weight;
-						}
-
-						if(!empty($dateOfBirth)) {
-							$date = DateTime::createFromFormat('d.m.Y', $dateOfBirth);
-
-							if(!$date){
-								$errors['date_of_birth'] = 'Datum narození musí být ve formátu DD.MM.RRRR';
-							}else{
-
-								$dnes = new DateTime();
-								$dnes->setTime(0, 0, 0);
-								$date->setTime(0, 0, 0);
-
-								if($date > $dnes){
-									$errors['date_of_birth'] = 'Datum narození nesmí být v budoucnosti';
-								}elseif($user['date_of_birth'] != $dateOfBirth){
-									$data['date_of_birth'] = $dateOfBirth;
-								}
-							}
-						}
-            
-            // Validace nového hesla, pokud bylo zadáno
-            if (!empty($passwordNew)) {
-                if (strlen($passwordNew) < 6) {
-                    $errors['password'] = 'Heslo musí mít alespoň 6 znaků';
-                } elseif ($password !== $passwordConfirm) {
-                    $errors['password_confirm'] = 'Hesla se neshodují';
-                } else {
-                    $data['passwordNew'] = $password;
-                }
-            }
-
+            // Validace uživatelského jména
             if ($username != $_SESSION["username"]) {
                 if (empty($username)) {
                     $errors['username'] = 'Uživatelské jméno je povinné';
+                } elseif (strlen($username) > 50) {
+                    $errors['username'] = 'Uživatelské jméno může mít maximálně 50 znaků';
+                } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+                    $errors['username'] = 'Uživatelské jméno může obsahovat pouze písmena, čísla a podtržítko';
                 } elseif ($this->userModel->usernameExists($username)) {
-                    $errors['username'] = 'Toto jmeno už někdo používá';
+                    $errors['username'] = 'Toto jméno už někdo používá';
                 } else {
                     $data['username'] = $username;
                 }
             }
 
-            if ($email != $this->userModel->getById($userId)['email']) {
+            // Validace emailu
+            if ($email != $user['email']) {
                 if (empty($email)) {
                     $errors['email'] = 'Email je povinný';
+                } elseif (strlen($email) > 100) {
+                    $errors['email'] = 'Email může mít maximálně 100 znaků';
                 } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    $errors['email'] = 'Nový email je neplatný';
+                    $errors['email'] = 'Neplatný formát emailu';
                 } elseif ($this->userModel->emailExists($email)) {
                     $errors['email'] = 'Tento email už někdo používá';
                 } else {
                     $data['email'] = $email;
                 }
             }
+
+            if(!empty($height)) {
+                if(!is_numeric($height)) {
+                    $errors['height'] = 'Výška musí být číslo';
+                } elseif($height < 50 || $height > 250) {
+                    $errors['height'] = 'Výška musí být mezi 50 a 250 cm';
+                } elseif($user['height'] != $height){
+                    $height = round($height, 2); // DECIMAL(5,2) v databázi
+                    $data['height'] = $height;
+                }
+            }
+
+            if(!empty($weight)) {
+                if(!is_numeric($weight)) {
+                    $errors['weight'] = 'Váha musí být číslo';
+                } elseif($weight < 20 || $weight > 500) {
+                    $errors['weight'] = 'Váha musí být mezi 20 a 500 kg';
+                } elseif($user['weight'] != $weight){
+                    $weight = round($weight, 2); // DECIMAL(5,2) v databázi
+                    $data['weight'] = $weight;
+                }
+            }
+
+            if(!empty($dateOfBirth)) {
+                $date = DateTime::createFromFormat('Y-m-d', $dateOfBirth);
+                
+                if(!$date) {
+                    $errors['date_of_birth'] = 'Datum narození musí být ve formátu RRRR-MM-DD';
+                } else {
+                    $dnes = new DateTime();
+                    $dnes->setTime(0, 0, 0);
+                    $date->setTime(0, 0, 0);
+                    $vek = $dnes->diff($date)->y;
+
+                    if($date > $dnes) {
+                        $errors['date_of_birth'] = 'Datum narození nesmí být v budoucnosti';
+                    } elseif($vek < 13) {
+                        $errors['date_of_birth'] = 'Musíte být starší 13 let';
+                    } elseif($vek > 120) {
+                        $errors['date_of_birth'] = 'Zadejte prosím platné datum narození';
+                    } elseif($user['date_of_birth'] != $dateOfBirth){
+                        $data['date_of_birth'] = $dateOfBirth;
+                    }
+                }
+            }
+
+            if (!empty($passwordNew) || !empty($password) || !empty($passwordConfirm)) {
+                if (empty($password)) {
+                    $errors['current_password'] = 'Pro změnu hesla musíte zadat současné heslo';
+                } elseif (empty($passwordNew)) {
+                    $errors['new_password'] = 'Zadejte nové heslo';
+                } elseif (empty($passwordConfirm)) {
+                    $errors['confirm_password'] = 'Potvrďte nové heslo';
+                } else {
+                    // Ověření původního hesla pomocí login metody
+                    $userCheck = $this->userModel->login($user['email'], $password);
+                    
+                    if (!$userCheck) {
+                        $errors['current_password'] = 'Nesprávné současné heslo';
+                    } else {
+                        if (strlen($passwordNew) < 6) {
+                            $errors['new_password'] = 'Heslo musí mít alespoň 6 znaků';
+                        } elseif (strlen($passwordNew) > 255) {
+                            $errors['new_password'] = 'Heslo je příliš dlouhé';
+                        } elseif ($passwordNew === $password) {
+                            $errors['new_password'] = 'Nové heslo musí být jiné než současné heslo';
+                        } elseif ($passwordNew !== $passwordConfirm) {
+                            $errors['confirm_password'] = 'Hesla se neshodují';
+                        } else {
+                            $data['password'] = $passwordNew;
+                        }
+                    }
+                }
+            }
             
             if (empty($errors)) {
-							if(!empty($data)) {
-                $result = $this->userModel->updateProfile($userId, $data);
+                if(!empty($data)) {
+                    $result = $this->userModel->updateProfile($userId, $data);
+                    unset($_SESSION['profile_errors']);
 
-								unset($_SESSION['profile_errors']);
-
-                if ($result) {
-                    $_SESSION['profile_updated'] = true;
-                    $_SESSION['username'] = $username;
-                    header('Location: index.php?page=profile');
-                    exit;
-                } else {
-                    $errors['general'] = 'Nastala chyba při aktualizaci profilu';
+                    if ($result) {
+                        $_SESSION['profile_updated'] = true;
+                        $_SESSION['username'] = $username;
+                        header('Location: index.php?page=profile');
+                        exit;
+                    } else {
+                        $errors['general'] = 'Nastala chyba při aktualizaci profilu';
+                    }
                 }
-							}
             }else{
-							// Pokud došlo k chybě, uložíme chyby do session
-							$_SESSION['profile_errors'] = $errors;
-						}
+                $_SESSION['profile_errors'] = $errors;
+            }
                        
             header('Location: index.php?page=profile');
             exit;
