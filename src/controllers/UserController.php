@@ -153,6 +153,16 @@ class UserController {
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['user_type'] = $user['user_type'];
                     
+                    if($user['user_type'] == 'admin'){ $_SESSION['admin_username'] = $user['username'];
+                        $_SESSION['admin_id'] = $user['id'];
+                        $_SESSION['admin_email'] = $user['email'];
+                        $_SESSION['admin_gender'] = $user['gender'];
+                        $_SESSION['admin_user_type'] = $user['user_type'];
+                        $_SESSION['admin_date_of_birth'] = $user['date_of_birth'];
+                        $_SESSION['admin_height'] = $user['height'];
+                        $_SESSION['admin_weight'] = $user['weight'];
+                    }
+                    
                     header('Location: index.php?page=dashboard');
                     exit;
                 } else {
