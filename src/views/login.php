@@ -55,13 +55,6 @@ unset($_SESSION['login_email']);
             <?php endif; ?>
         </div>
         
-        <div class="form-group checkbox-group">
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember" class="checkbox-label">Zapamatovat si mě</label>
-            </div>
-        </div>
-        
         <div class="form-actions">
             <button type="submit" class="btn primary-btn btn-block w-full">
                 <i class="fas fa-sign-in-alt btn-icon"></i>

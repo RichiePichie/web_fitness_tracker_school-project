@@ -120,7 +120,6 @@ class UserController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
-            $remember = isset($_POST['remember']) ? true : false;
             
             $errors = [];
             
@@ -173,10 +172,7 @@ class UserController {
             } else {
                 // Uložení chyb a dat do session
                 $_SESSION['login_errors'] = $errors;
-                $_SESSION['login_form_data'] = [
-                    'email' => $email,
-                    'remember' => $remember
-                ];
+                $_SESSION['login_form_data'] = $email;
                 
                 header('Location: index.php?page=login');
                 exit;
