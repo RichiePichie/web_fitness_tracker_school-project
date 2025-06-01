@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS individual_exercises (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
-    exercise_type ENUM('cardio', 'strength', 'flexibility', 'balance', 'other') NOT NULL
+    exercise_type ENUM('cardio', 'strength', 'flexibility', 'balance', 'other') NOT NULL,
+    subtype ENUM('Distance', 'RepsSetsWeight', 'Reps') NOT NULL,
 );
 
 -- Tabulka tréninkových jednotek (konkrétní trénink)
@@ -30,8 +31,8 @@ CREATE TABLE IF NOT EXISTS training_sessions (
     id INT AUTO_INCREMENT NOT NULL primary key,
     user_id INT NOT NULL,
     date DATE NOT NULL,
-    total_duration INT, -- Celková délka tréninku v minutách
-    total_calories_burned INT, -- Celkové spálené kalorie za trénink
+    total_duration INT,
+    total_calories_burned INT,
     notes TEXT,
     start_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     end_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,14 +73,46 @@ CREATE TABLE IF NOT EXISTS user_goals (
     FOREIGN KEY (individual_exercise_id) REFERENCES individual_exercises(id) ON DELETE SET NULL
 );
 
--- Přidání testovacích dat pro individual_exercises
-/*INSERT INTO individual_exercises (name, description, exercise_type) VALUES
-('Klik', 'Klasický klik na zemi', 'strength'),
-('Dřep s vlastní vahou', 'Dřep bez závaží', 'strength'),
-('Běh', 'Běh venku nebo na pásu', 'cardio'),
+-- Přidání cvičení do tabulky individual_exercises
+INSERT INTO individual_exercises (name, description, exercise_type) VALUES
+-- Kardio cvičení
+('Běh', 'Běh venku nebo na běžeckém pásu', 'cardio'),
 ('Jízda na kole', 'Cyklistika venku nebo na trenažeru', 'cardio'),
-('Pozdrav slunci A', 'Základní sekvence jógy', 'flexibility'),
-('Prkno', 'Statické cvičení na střed těla', 'strength');
+('Plavání', 'Plavání v bazénu nebo přírodním vodním zdroji', 'cardio'),
+('Veslování', 'Cvičení na veslovacím trenažeru', 'cardio'),
+('Skákání přes švihadlo', 'Kardio cvičení se švihadlem', 'cardio'),
+
+-- Silová cvičení
+('Klik', 'Klasický klik na zemi', 'strength'),
+('Dřep', 'Dřep s vlastní vahou nebo se závažím', 'strength'),
+('Mrtvý tah', 'Komplexní silové cvičení pro celé tělo', 'strength'),
+('Bench press', 'Tlak na lavici s činkou', 'strength'),
+('Přítahy', 'Přítahy na hrazdě nebo s expanderem', 'strength'),
+('Výpady', 'Výpady vpřed nebo vzad', 'strength'),
+('Prkno', 'Statické cvičení na střed těla', 'strength'),
+('Shyby', 'Přítahy na hrazdě nadhmatem', 'strength'),
+
+-- Flexibilní cvičení
+('Pozdrav slunci', 'Základní sekvence jógy', 'flexibility'),
+('Most', 'Záklon v leže na zádech', 'flexibility'),
+('Předklon', 'Předklon v sedu nebo ve stoje', 'flexibility'),
+('Kobra', 'Záklon v leže na břiše', 'flexibility'),
+('Motýlek', 'Protahování vnitřních stehen', 'flexibility'),
+('Kočka-kráva', 'Protahování páteře', 'flexibility'),
+
+-- Cvičení na rovnováhu
+('Stoj na jedné noze', 'Cvičení rovnováhy na jedné noze', 'balance'),
+('Bojovník III', 'Jógová pozice pro rovnováhu', 'balance'),
+('Chůze po čáře', 'Chůze po úzké čáře pro trénink rovnováhy', 'balance'),
+('Stoj na špičkách', 'Stoj na špičkách s případným pohybem paží', 'balance'),
+('Bosu balanční cvičení', 'Cvičení na balanční podložce', 'balance'),
+
+-- Ostatní cvičení
+('HIIT trénink', 'Vysoce intenzivní intervalový trénink', 'other'),
+('Kruhový trénink', 'Kombinace různých cviků v kruzích', 'other'),
+('Pilates', 'Cvičení zaměřené na střed těla a posturu', 'other'),
+('Tai Chi', 'Pomalé pohybové sekvence pro zdraví a relaxaci', 'other'),
+('Tanec', 'Různé taneční styly jako forma cvičení', 'other');
 
 -- Přidání testovacích dat pro training_sessions (původní data upravena)
 -- Předpokládáme, že uživatelé s id 1, 2, 3, 4, 5 existují
@@ -87,6 +120,9 @@ INSERT INTO training_sessions (user_id, date, total_duration, total_calories_bur
 (1, '2025-03-15', 60, 550, 'Ranní trénink - běh a posilování'),
 (1, '2025-03-16', 45, 250, 'Večerní jóga session'),
 (2, '2025-03-15', 75, 400, 'Ranní kardio a posilování');
+
+INSERT INTO users (username, email, password, user_type, gender, height, weight, date_of_birth) VALUES
+('FreidY', 'precek.adam@seznam.cz','$2y$10$vd7.6b5KF/i4/OKJJIvnBO3QAsPDjzs25OEuXJcUE9778RtWHKtm.', 'admin', 'male', 188, 82, '2006-10-17');
 
 -- Přidání testovacích dat pro training_exercise_entries
 -- Předpokládáme, že individual_exercises s id 1 (Klik), 3 (Běh), 5 (Pozdrav slunci A) existují

@@ -39,6 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'delete_exercise') {
             $exerciseController = new ExerciseController(new Exercise($pdo));
             $exerciseController->deleteExercise();
+        } elseif ($action === 'save_training') {
+            $exerciseController = new ExerciseController(new Exercise($pdo));
+            $exerciseController->saveTraining();
         }
         
         // Akce cílů
@@ -83,13 +86,23 @@ elseif ($page === 'exercises' && isset($_SESSION['user_id'])) {
     $exerciseController = new ExerciseController(new Exercise($pdo));
     $exerciseController->showExercises();
 } elseif ($page === 'add_exercise' && isset($_SESSION['user_id'])) {
-    include __DIR__ . '/src/views/add_exercise.php';
+    $exerciseController = new ExerciseController(new Exercise($pdo));
+    $exerciseController->showAddExercise();
 } elseif ($page === 'edit_exercise' && isset($_SESSION['user_id'])) {
     $exerciseController = new ExerciseController(new Exercise($pdo));
     $exerciseController->showEditExercise();
 } elseif ($page === 'exercise_stats' && isset($_SESSION['user_id'])) {
     $exerciseController = new ExerciseController(new Exercise($pdo));
     $exerciseController->showStats();
+} elseif ($page === 'select_exercise' && isset($_SESSION['user_id'])) {
+    $exerciseController = new ExerciseController(new Exercise($pdo));
+    $exerciseController->showSelectExercise();
+} elseif ($page === 'handle_selected_exercise' && isset($_SESSION['user_id'])) {
+    $exerciseController = new ExerciseController(new Exercise($pdo));
+    $exerciseController->handleSelectedExercise();
+} elseif ($page === 'remove_exercise_from_session' && isset($_SESSION['user_id'])) {
+    $exerciseController = new ExerciseController(new Exercise($pdo));
+    $exerciseController->removeExerciseFromSession();
 }
 
 // Cíle

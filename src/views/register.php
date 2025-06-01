@@ -116,7 +116,7 @@ unset($_SESSION['register_form_data']);
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn primary-btn w-100">
+            <button type="submit" class="btn primary-btn w-full">
                 <i class="fas fa-user-plus btn-icon"></i>
                 Vytvořit účet
             </button>
