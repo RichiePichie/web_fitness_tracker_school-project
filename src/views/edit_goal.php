@@ -8,7 +8,7 @@ unset($_SESSION['goal_errors']);
 <div class="container mt-4">
     <h1>Upravit cíl</h1>
 
-    <form action="index.php?page=update_goal" method="post" class="needs-validation" novalidate>
+    <form action="index.php?action=update_goal" method="post" class="needs-validation" novalidate>
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($goal['id']); ?>">
 
         <div class="mb-3">
