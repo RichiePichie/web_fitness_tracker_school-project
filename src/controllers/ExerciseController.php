@@ -6,7 +6,7 @@ class ExerciseController {
         $this->exerciseModel = $exerciseModel;
     }
     
-    // Zobrazení přehledu cvičení
+    // Zobrazeni prehledu cviceni
     public function showExercises() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -24,7 +24,7 @@ class ExerciseController {
         include __DIR__ . '/../views/exercises.php';
     }
     
-    // Zobrazení formuláře pro přidání cvičení
+    // Zobrazeni formulare pro pridani cviceni
     public function showAddExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -35,7 +35,7 @@ class ExerciseController {
         include __DIR__ . '/../views/add_exercise.php';
     }
     
-    // Zobrazení stránky pro výběr cviku
+    // Zobrazeni stranky pro vyber cviku
     public function showSelectExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -46,7 +46,7 @@ class ExerciseController {
         include __DIR__ . '/../views/select_exercise.php';
     }
     
-    // Zpracování přidání cvičení
+    // Zpracovani pridani cviceni
     public function addExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -66,19 +66,19 @@ class ExerciseController {
             
             // Validace vstupu
             if (empty($title)) {
-                $errors['title'] = 'Název cvičení je povinný';
+                $errors['title'] = 'Nazev cviceni je povinny';
             }
             
             if (empty($exerciseType)) {
-                $errors['exercise_type'] = 'Typ cvičení je povinný';
+                $errors['exercise_type'] = 'Typ cviceni je povinny';
             }
             
             if ($duration <= 0) {
-                $errors['duration'] = 'Doba trvání musí být větší než 0';
+                $errors['duration'] = 'Doba trvani musi byt vetsi nez 0';
             }
             
             if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                $errors['date'] = 'Neplatné datum';
+                $errors['date'] = 'Neplatne datum';
             }
             
             if (empty($errors)) {
@@ -97,12 +97,12 @@ class ExerciseController {
                 //     header('Location: index.php?page=exercises');
                 //     exit;
                 // } else {
-                //     $errors['general'] = 'Nastala chyba při přidávání cvičení';
+                //     $errors['general'] = 'Nastala chyba pri pridavani cviceni';
                 // }
-                $errors['general'] = 'Funkce pro přidávání tohoto typu cvičení není momentálně dostupná.';
+                $errors['general'] = 'Funkce pro pridavani tohoto typu cviceni neni momentalne dostupna.';
             }
             
-            // Pokud došlo k chybě, uložíme chyby a data do session
+            // Pokud doslo k chybe, ulozime chyby a data do session
             $_SESSION['exercise_errors'] = $errors;
             $_SESSION['exercise_data'] = [
                 'title' => $title,
@@ -118,7 +118,7 @@ class ExerciseController {
         }
     }
     
-    // Zobrazení formuláře pro editaci cvičení
+    // Zobrazeni formulare pro editaci cviceni
     public function showEditExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -138,7 +138,7 @@ class ExerciseController {
         include __DIR__ . '/../views/edit_exercise.php';
     }
     
-    // Zpracování editace cvičení
+    // Zpracovani editace cviceni
     public function updateExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -147,7 +147,7 @@ class ExerciseController {
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userId = $_SESSION['user_id'];
-            $exerciseId = $_POST['id'] ?? 0;
+            $exerciseId = $_GET['id'] ?? 0;
             
             $exercise = $this->exerciseModel->getTrainingSessionById($exerciseId);
             
@@ -167,19 +167,19 @@ class ExerciseController {
             
             // Validace vstupu
             if (empty($title)) {
-                $errors['title'] = 'Název cvičení je povinný';
+                $errors['title'] = 'Nazev cviceni je povinny';
             }
             
             if (empty($exerciseType)) {
-                $errors['exercise_type'] = 'Typ cvičení je povinný';
+                $errors['exercise_type'] = 'Typ cviceni je povinny';
             }
             
             if ($duration <= 0) {
-                $errors['duration'] = 'Doba trvání musí být větší než 0';
+                $errors['duration'] = 'Doba trvani musi byt vetsi nez 0';
             }
             
             if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                $errors['date'] = 'Neplatné datum';
+                $errors['date'] = 'Neplatne datum';
             }
             
             if (empty($errors)) {
@@ -199,18 +199,18 @@ class ExerciseController {
                     header('Location: index.php?page=exercises');
                     exit;
                 } else {
-                    $errors['general'] = 'Nastala chyba při aktualizaci cvičení';
+                    $errors['general'] = 'Nastala chyba pri aktualizaci cviceni';
                 }
             }
             
-            // Pokud došlo k chybě, uložíme chyby do session
+            // Pokud doslo k chybe, ulozime chyby do session
             $_SESSION['exercise_errors'] = $errors;
             header('Location: index.php?page=edit_exercise&id=' . $exerciseId);
             exit;
         }
     }
     
-    // Zpracování odstranění cvičení
+    // Zpracovani odstraneni cviceni
     public function deleteExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -241,7 +241,7 @@ class ExerciseController {
         }
     }
     
-    // Zobrazení statistik cvičení
+    // Zobrazeni statistik cviceni
     public function showStats() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -255,7 +255,7 @@ class ExerciseController {
         include __DIR__ . '/../views/exercise_stats.php';
     }
     
-    // Zpracování vybraného cviku
+    // Zpracovani vybraneho cviku
     public function handleSelectedExercise() {
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
@@ -272,19 +272,19 @@ class ExerciseController {
                     $_SESSION['selected_exercises'] = [];
                 }
                 
-                // Najdeme nejvyšší dostupný index
+                // Najdeme nejvyssi dostupny index
                 $maxIndex = -1;
                 if (!empty($_SESSION['selected_exercises'])) {
                     $maxIndex = max(array_keys($_SESSION['selected_exercises']));
                 }
                 
-                // Použijeme buď nejvyšší index + 1, nebo 0, pokud je pole prázdné
+                // Pouzijeme buď nejvyssi index + 1, nebo 0, pokud je pole prazdne
                 $newIndex = $maxIndex + 1;
 
-                // Zachováme existující data cviku, pokud existují
+                // Zachovame existujici data cviku, pokud existuji
                 $existingExercise = isset($_SESSION['selected_exercises'][$newIndex]) ? $_SESSION['selected_exercises'][$newIndex] : null;
                 
-                // Vytvoříme nový záznam cviku s kombinací nových a existujících dat
+                // Vytvorime novy zaznam cviku s kombinaci novych a existujicich dat
                 $_SESSION['selected_exercises'][$newIndex] = [
                     'id' => $selectedExercise['id'],
                     'name' => $selectedExercise['name'],
@@ -298,13 +298,13 @@ class ExerciseController {
             }
         }
         
-        // Přesměrování zpět na formulář
+        // Presmerovani zpet na formular
         $returnTo = $_GET['return_to'] ?? '';
         header('Location: index.php?page=' . $returnTo);
         exit;
     }
 
-    // Odstranění cviku ze sessionu
+    // Odstraneni cviku ze sessionu
     public function removeExerciseFromSession() {
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
@@ -317,7 +317,7 @@ class ExerciseController {
             
             if (isset($_SESSION['selected_exercises'][$index])) {
                 unset($_SESSION['selected_exercises'][$index]);
-                // Přeskládání indexů
+                // Preskladani indexu
                 $_SESSION['selected_exercises'] = array_values($_SESSION['selected_exercises']);
                 echo json_encode(['success' => true]);
             } else {
@@ -330,13 +330,8 @@ class ExerciseController {
         exit;
     }
 
-    // Zpracování přidání tréninku s cviky
+    // Zpracovani pridani treninku s cviky
     public function saveTraining() {
-        // Zapnutí zobrazení všech chyb
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
-
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?page=login');
             exit;
@@ -348,26 +343,26 @@ class ExerciseController {
             $notes = $_POST['notes'] ?? '';
             $exercises = $_POST['exercises'] ?? [];
 
-            // Debug: Výpis přijatých dat
-            error_log('Data z formuláře: ' . print_r(["user_id" => $userId, "date" => $date, "notes" => $notes, "exercises" => $exercises], true));
+            // Debug: Vypis prijatych dat
+            error_log('Data z formulare: ' . print_r(["user_id" => $userId, "date" => $date, "notes" => $notes, "exercises" => $exercises], true));
 
             $errors = [];
 
             // Validace vstupu
             if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                $errors['date'] = 'Neplatné datum';
+                $errors['date'] = 'Neplatne datum';
             }
 
             if (empty($exercises)) {
-                $errors['exercises'] = 'Musíte přidat alespoň jeden cvik';
-                error_log('Chyba: Žádné cviky nebyly zadány');
+                $errors['exercises'] = 'Musite pridat alespoň jeden cvik';
+                error_log('Chyba: zadne cviky nebyly zadany');
             }
 
-            // Validace cviků
+            // Validace cviku
             foreach ($exercises as $index => $exercise) {
                 if (empty($exercise['exercise_id'])) {
-                    $errors['exercises'][$index] = 'Musíte vybrat cvik';
-                    error_log('Chyba: Cvik #' . $index . ' nemá zadané ID');
+                    $errors['exercises'][$index] = 'Musite vybrat cvik';
+                    error_log('Chyba: Cvik #' . $index . ' nema zadane ID');
                     continue;
                 }
 
@@ -375,34 +370,34 @@ class ExerciseController {
                 $exerciseData = $this->exerciseModel->getExerciseById($exercise['exercise_id']);
                 if ($exerciseData) {
                     error_log('Cvik #' . $index . ' (' . $exercise['exercise_id'] . '): ' . json_encode($exerciseData));
-                    // Kontrola podle enum hodnoty v databázi
+                    // Kontrola podle enum hodnoty v databazi
                     if ($exerciseData['exercise_type'] === 'strength' || $exerciseData['exercise_type'] === 'silovy') {
                         if (empty($exercise['sets']) || empty($exercise['reps'])) {
-                            $errors['exercises'][$index] = 'Pro silový cvik musíte vyplnit série a opakování';
-                            error_log('Chyba: Silový cvik #' . $index . ' nemá série nebo opakování');
+                            $errors['exercises'][$index] = 'Pro silovy cvik musite vyplnit serie a opakovani';
+                            error_log('Chyba: Silovy cvik #' . $index . ' nema serie nebo opakovani');
                         }
                     } elseif ($exerciseData['exercise_type'] === 'cardio' || $exerciseData['exercise_type'] === 'kardio') {
                         if (empty($exercise['distance'])) {
-                            $errors['exercises'][$index] = 'Pro kardio cvik musíte vyplnit vzdálenost';
-                            error_log('Chyba: Kardio cvik #' . $index . ' nemá vzdálenost');
+                            $errors['exercises'][$index] = 'Pro kardio cvik musite vyplnit vzdalenost';
+                            error_log('Chyba: Kardio cvik #' . $index . ' nema vzdalenost');
                         }
                     }
-                    // Vypsání typu cvičení pro debug účely
-                    error_log('Typ cvičení: ' . $exerciseData['exercise_type']);
+                    // Vypsani typu cviceni pro debug ucely
+                    error_log('Typ cviceni: ' . $exerciseData['exercise_type']);
                 } else {
-                    $errors['exercises'][$index] = 'Vybraný cvik neexistuje.';
+                    $errors['exercises'][$index] = 'Vybrany cvik neexistuje.';
                     error_log('Chyba: Cvik s ID ' . $exercise['exercise_id'] . ' neexistuje');
                 }
             }
 
-            // Pokud nejsou chyby, vytvoříme trénink a přidáme cviky
+            // Pokud nejsou chyby, vytvorime trenink a pridame cviky
             if (empty($errors)) {
                 try {
-                    // Začátek transakce
-                    error_log('Začínám transakci pro vytvoření tréninku');
+                    // Zacatek transakce
+                    error_log('Zacinam transakci pro vytvoreni treninku');
                     $this->exerciseModel->beginTransaction();
                     
-                    // Vytvoření tréninkové jednotky
+                    // Vytvoreni treninkove jednotky
                     $trainingSessionId = $this->exerciseModel->createTrainingSession(
                         $userId, 
                         $date, 
@@ -412,20 +407,19 @@ class ExerciseController {
                     );
                     
                     if (!$trainingSessionId) {
-                        error_log('CHYBA: Nepodařilo se vytvořit tréninkovou jednotku - ID: ' . var_export($trainingSessionId, true));
-                        throw new Exception('Nepodařilo se vytvořit tréninkovou jednotku');
+                        error_log('CHYBA: Nepodarilo se vytvorit treninkovou jednotku - ID: ' . var_export($trainingSessionId, true));
+                        throw new Exception('Nepodarilo se vytvorit treninkovou jednotku');
                     }
                     
-                    error_log('Vytvořena tréninková jednotka s ID: ' . $trainingSessionId);
+                    error_log('Vytvorena treninkova jednotka s ID: ' . $trainingSessionId);
 
-                    // Přidání cviků do tréninku
+                    // Pridani cviku do treninku
                     foreach ($exercises as $index => $exercise) {
-                        error_log('Přidávání cviku #' . $index . ' (ID: ' . $exercise['exercise_id'] . ') do tréninku');
-                        // Konverze prázdných řetězců na NULL hodnoty pro číselné sloupce
-                        $sets = (isset($exercise['sets']) && $exercise['sets'] !== '') ? $exercise['sets'] : null;
-                        $reps = (isset($exercise['reps']) && $exercise['reps'] !== '') ? $exercise['reps'] : null;
-                        $weight = (isset($exercise['weight']) && $exercise['weight'] !== '') ? $exercise['weight'] : null;
-                        $distance = (isset($exercise['distance']) && $exercise['distance'] !== '') ? $exercise['distance'] : null;
+                        error_log('Pridavani cviku #' . $index . ' (ID: ' . $exercise['exercise_id'] . ') do treninku');
+                        $sets = (isset($exercise['sets']) && $exercise['sets'] !== '') ? $exercise['sets'] : 0;
+                        $reps = (isset($exercise['reps']) && $exercise['reps'] !== '') ? $exercise['reps'] : 0;
+                        $weight = (isset($exercise['weight']) && $exercise['weight'] !== '') ? $exercise['weight'] : 0;
+                        $distance = (isset($exercise['distance']) && $exercise['distance'] !== '') ? $exercise['distance'] : 0;
                         
                         error_log('Parametry pro addExerciseToSession: sets=' . var_export($sets, true) . 
                                  ', reps=' . var_export($reps, true) . 
@@ -442,33 +436,33 @@ class ExerciseController {
                         );
 
                         if (!$success) {
-                            error_log('CHYBA: Nepodařilo se přidat cvik #' . $index . ' (ID cviku: ' . $exercise['exercise_id'] . ') do tréninkové jednotky ID: ' . $trainingSessionId . '. Metoda addExerciseToSession vrátila false.');
-                            throw new Exception('Nepodařilo se přidat cvik #' . $index . ' do tréninku');
+                            error_log('CHYBA: Nepodarilo se pridat cvik #' . $index . ' (ID cviku: ' . $exercise['exercise_id'] . ') do treninkove jednotky ID: ' . $trainingSessionId . '. Metoda addExerciseToSession vratila false.');
+                            throw new Exception('Nepodarilo se pridat cvik #' . $index . ' do treninku');
                         }
-                        error_log('Cvik #' . $index . ' (ID cviku: ' . $exercise['exercise_id'] . ') úspěšně přidán do tréninkové jednotky ID: ' . $trainingSessionId . '.');
+                        error_log('Cvik #' . $index . ' (ID cviku: ' . $exercise['exercise_id'] . ') uspesne pridan do treninkove jednotky ID: ' . $trainingSessionId . '.');
                     }
 
                     // Commit transakce
                     $this->exerciseModel->commitTransaction();
-                    error_log('Transakce úspěšně dokončena');
+                    error_log('Transakce uspesne dokoncena');
 
-                    // Vyčištění session
+                    // Vycisteni session
                     unset($_SESSION['selected_exercises']);
                     unset($_SESSION['exercise_data']);
 
                     $_SESSION['training_added'] = true;
-                    error_log('Trénink úspěšně přidán, přesměrování na přehled');
+                    error_log('Trenink uspesne pridan, presmerovani na prehled');
                     header('Location: index.php?page=exercises');
                     exit;
                 } catch (Exception $e) {
-                    // Rollback v případě chyby
+                    // Rollback v pripade chyby
                     $this->exerciseModel->rollbackTransaction();
-                    error_log('CHYBA při vytváření tréninku: ' . $e->getMessage());
+                    error_log('CHYBA pri vytvareni treninku: ' . $e->getMessage());
                     $errors['general'] = 'Nastala chyba: ' . $e->getMessage();
                 }
             }
 
-            // Pokud došlo k chybě, uložíme chyby a data do session
+            // Pokud doslo k chybe, ulozime chyby a data do session
             $_SESSION['exercise_errors'] = $errors;
             $_SESSION['exercise_data'] = [
                 'date' => $date,

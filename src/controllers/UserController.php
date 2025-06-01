@@ -79,6 +79,7 @@ class UserController {
                 if ($userId) {
                     $_SESSION['user_id'] = $userId;
                     $_SESSION['username'] = $username;
+                    $_SESSION['user_type'] = $usertype;
                     
                     header('Location: index.php?page=dashboard');
                     exit;
@@ -92,7 +93,7 @@ class UserController {
                         'username' =>$username,
                         'email' => $email,
                         'gender' => $gender,
-                        'terms' => $terms
+                        'terms' => $terms>
                     ];
                     
                     header('Location: index.php?page=register');
@@ -152,26 +153,6 @@ class UserController {
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['user_type'] = $user['user_type'];
-                    
-                    /* Pokud uživatel zaškrtl "Zapamatovat si mě" (Kdyžtak dodělat)
-                    if ($remember) {
-                        // Vytvoření bezpečného tokenu
-                        $token = bin2hex(random_bytes(32));
-                        $expires = time() + (30 * 24 * 60 * 60); // 30 dní
-                        
-                        // Uložení tokenu do databáze (předpokládá existenci tabulky remember_tokens)
-                        $sql = "INSERT INTO remember_tokens (user_id, token, expires_at) 
-                                VALUES (:user_id, :token, :expires)";
-                        $stmt = $this->pdo->prepare($sql);
-                        $stmt->execute([
-                            ':user_id' => $user['id'],
-                            ':token' => $token,
-                            ':expires' => date('Y-m-d H:i:s', $expires)
-                        ]);
-                        
-                        // Nastavení cookie
-                        setcookie('remember_token', $token, $expires, '/', '', true, true);
-                    }*/
                     
                     header('Location: index.php?page=dashboard');
                     exit;

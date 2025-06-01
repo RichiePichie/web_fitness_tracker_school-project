@@ -2981,6 +2981,10 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
     color: var(--text-color);
 }
 
+.progress-title i{
+    padding-right: 0.5rem;
+}
+
 .progress-percentage {
     font-weight: 700;
     color: var(--primary-color);

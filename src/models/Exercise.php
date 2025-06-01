@@ -86,8 +86,6 @@ class Exercise {
 
     // Získání všech tréninkových jednotek uživatele
     public function getAllTrainingSessionsByUser($userId, $limit = null, $offset = 0) {
-        // Nastavení GROUP_CONCAT_MAX_LEN na vyšší hodnotu pro více dat
-        $this->pdo->exec('SET SESSION group_concat_max_len = 1000000');
         
         $sql = "SELECT ts.*, 
                 GROUP_CONCAT(

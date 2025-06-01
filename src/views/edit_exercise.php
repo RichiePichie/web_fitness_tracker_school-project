@@ -56,7 +56,9 @@ foreach ($selectedExercises as $index => $exercise) {
         ];
     }
     $data['exercises'][$index]['exercise_id'] = $exercise['id'];
+
 }
+print_r($_SESSION);
 
 unset($_SESSION['exercise_errors']);
 ?>
