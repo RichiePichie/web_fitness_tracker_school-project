@@ -82,11 +82,11 @@ include 'header.php';
                             </div>
                             
                             <div class="d-flex justify-content-between">
-                                <a href="index.php?page=edit_goal&id=<?php echo $goal['id']; ?>" class="btn btn-sm btn-primary">Upravit</a>
-                                <form action="index.php?page=delete_goal" method="post" class="d-inline" 
+                                <a href="index.php?page=edit_goal&id=<?php echo $goal['id']; ?>" class="btn btn-primary"><i class="fas fa-edit me-2"></i>Upravit</a>
+                                <form action="index.php?action=delete_goal" method="post" class="d-inline" 
                                       onsubmit="return confirm('Opravdu chcete smazat tento cíl?');">
                                     <input type="hidden" name="id" value="<?php echo $goal['id']; ?>">
-                                    <button type="submit" class="btn btn-sm btn-danger">Smazat</button>
+                                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt me-2"></i>Smazat</button>
                                 </form>
                             </div>
                         </div>

@@ -1,96 +1,82 @@
 <?php
-require_once 'auth_check.php'; // Ensures admin is logged in
-require_once '../config.php';   // Contains PDO connection
+require_once 'auth_check.php';
+require_once '../config.php';
 
 $pageTitle = "Edit Goal - Admin Panel";
-$goal_id = $_GET['id'] ?? null;
-$goal_details = null;
 $error_message = '';
 $success_message = '';
+$goal = null;
 
-if (!$goal_id || !filter_var($goal_id, FILTER_VALIDATE_INT)) {
-    $_SESSION['goal_management_error'] = 'Invalid goal ID.';
-    header('Location: manage_goals.php');
-    exit;
-}
+// Check if this is a new goal or editing existing
+$isNewGoal = !isset($_GET['id']);
 
-// Fetch goal details
-try {
-    $stmt_goal = $pdo->prepare(
-        "SELECT ug.*, u.username 
-         FROM user_goals ug
-         JOIN users u ON ug.user_id = u.id
-         WHERE ug.id = :id"
-    );
-    $stmt_goal->bindParam(':id', $goal_id, PDO::PARAM_INT);
-    $stmt_goal->execute();
-    $goal_details = $stmt_goal->fetch(PDO::FETCH_ASSOC);
-
-    if (!$goal_details) {
-        $_SESSION['goal_management_error'] = 'Goal not found.';
-        header('Location: manage_goals.php');
-        exit;
-    }
-} catch (PDOException $e) {
-    $error_message = "Error fetching goal details: " . $e->getMessage();
-    // Log this error
-}
-
-// Handle form submission for updating the goal
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_goal'])) {
-    // Retrieve and sanitize/validate inputs
-    $title = trim($_POST['title'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $goal_type = $_POST['goal_type'] ?? '';
-    $target_value = filter_var($_POST['target_value'] ?? '', FILTER_VALIDATE_FLOAT);
-    $current_value = filter_var($_POST['current_value'] ?? '', FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE);
-    $start_date = $_POST['start_date'] ?? '';
-    $end_date = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
-    $status = $_POST['status'] ?? '';
-
-    // Basic validation
-    if (empty($title) || empty($goal_type) || $target_value === false || empty($start_date) || empty($status)) {
-        $error_message = "Please fill in all required fields correctly.";
-    } else {
-        try {
-            $update_sql = "UPDATE user_goals SET 
-                            title = :title, 
-                            description = :description, 
-                            goal_type = :goal_type, 
-                            target_value = :target_value, 
-                            current_value = :current_value, 
-                            start_date = :start_date, 
-                            end_date = :end_date, 
-                            status = :status,
-                            updated_at = CURRENT_TIMESTAMP
-                          WHERE id = :goal_id";
-            
-            $stmt_update = $pdo->prepare($update_sql);
-            
-            $stmt_update->bindParam(':title', $title);
-            $stmt_update->bindParam(':description', $description);
-            $stmt_update->bindParam(':goal_type', $goal_type);
-            $stmt_update->bindParam(':target_value', $target_value);
-            $stmt_update->bindParam(':current_value', $current_value);
-            $stmt_update->bindParam(':start_date', $start_date);
-            $stmt_update->bindParam(':end_date', $end_date);
-            $stmt_update->bindParam(':status', $status);
-            $stmt_update->bindParam(':goal_id', $goal_id, PDO::PARAM_INT);
-
-            if ($stmt_update->execute()) {
-                $success_message = "Goal updated successfully!";
-                // Re-fetch goal details to display updated data
-                $stmt_goal->execute(); // Re-run the fetch query
-                $goal_details = $stmt_goal->fetch(PDO::FETCH_ASSOC);
-            } else {
-                $error_message = "Failed to update goal. Please try again.";
-            }
-        } catch (PDOException $e) {
-            $error_message = "Database error: " . $e->getMessage();
+if (!$isNewGoal) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM user_goals WHERE id = ?");
+        $stmt->execute([$_GET['id']]);
+        $goal = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$goal) {
+            $_SESSION['goal_management_error'] = "Goal not found.";
+            header("Location: manage_goals.php");
+            exit;
         }
+    } catch (PDOException $e) {
+        $error_message = "Error loading goal: " . $e->getMessage();
     }
 }
 
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        if ($isNewGoal) {
+            // Create new goal
+            $stmt = $pdo->prepare("INSERT INTO user_goals (user_id, title, description, goal_type, target_value, current_value, start_date, end_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $_POST['user_id'],
+                $_POST['title'],
+                $_POST['description'],
+                $_POST['goal_type'],
+                $_POST['target_value'],
+                $_POST['current_value'] ?? 0,
+                $_POST['start_date'],
+                $_POST['end_date'],
+                $_POST['status']
+            ]);
+            $success_message = "Goal created successfully!";
+        } else {
+            // Update existing goal
+            $stmt = $pdo->prepare("UPDATE user_goals SET user_id = ?, title = ?, description = ?, goal_type = ?, target_value = ?, current_value = ?, start_date = ?, end_date = ?, status = ? WHERE id = ?");
+            $stmt->execute([
+                $_POST['user_id'],
+                $_POST['title'],
+                $_POST['description'],
+                $_POST['goal_type'],
+                $_POST['target_value'],
+                $_POST['current_value'],
+                $_POST['start_date'],
+                $_POST['end_date'],
+                $_POST['status'],
+                $_GET['id']
+            ]);
+            $success_message = "Goal updated successfully!";
+        }
+        
+        $_SESSION['goal_management_success'] = $success_message;
+        header("Location: manage_goals.php");
+        exit;
+    } catch (PDOException $e) {
+        $error_message = "Error saving goal: " . $e->getMessage();
+    }
+}
+
+// Get users for dropdown
+try {
+    $stmt = $pdo->query("SELECT id, username FROM users ORDER BY username");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error_message = "Error loading users: " . $e->getMessage();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,110 +85,150 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_goal'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="stylesheet" href="../public/css/styles.css">
+    <link rel="stylesheet" href="../public/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body>
-    <header>
-        <h1><?php echo htmlspecialchars($pageTitle); ?> (ID: <?php echo htmlspecialchars($goal_id); ?>)</h1>
-    </header>
+<body class="admin-body">
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-logo">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>Fitness Admin</span>
+                </h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3 class="nav-title">Navigation</h3>
+                    <ul>
+                        <li>
+                            <a href="index.php">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="users.php">
+                                <i class="fas fa-users"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="activities.php">
+                                <i class="fas fa-running"></i>
+                                <span>Activities</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="manage_goals.php" class="active">
+                                <i class="fas fa-bullseye"></i>
+                                <span>Goals</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="logout.php" class="logout-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
 
-    <nav>
-        <ul>
-            <li><a href="../index.php" target="_blank">View Main Site</a></li>
-            <li><a href="index.php">Dashboard</a></li>
-            <li><a href="users.php">Manage Users</a></li>
-            <li><a href="activities.php">Manage Activities</a></li>
-            <li><a href="manage_goals.php">Manage Goals</a></li>
-            <li><a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['admin_username']); ?>)</a></li>
-        </ul>
-    </nav>
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-content">
+                    <h1><?php echo $isNewGoal ? 'Add New Goal' : 'Edit Goal'; ?></h1>
+                </div>
+            </header>
 
-    <div class="container">
-        <div class="content">
-            <a href="manage_goals.php" class="back-link">&laquo; Back to Goals List</a>
+            <div class="admin-content">
+                <?php if ($error_message): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
 
-            <?php if ($error_message): ?>
-                <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
-            <?php endif; ?>
-            <?php if ($success_message): ?>
-                <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
-            <?php endif; ?>
-
-            <?php if ($goal_details && !$error_message): ?>
-                <form action="edit_goal_admin.php?id=<?php echo htmlspecialchars($goal_id); ?>" method="POST" class="admin-form">
-                    <fieldset>
-                        <legend>Edit Goal Details for User: <?php echo htmlspecialchars($goal_details['username']); ?></legend>
-                        
+                <div class="content-card">
+                    <form method="POST" class="admin-form">
                         <div class="form-group">
-                            <label for="title">Title:</label>
-                            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($goal_details['title']); ?>" required>
+                            <label for="user_id">User:</label>
+                            <select id="user_id" name="user_id" required>
+                                <option value="">Select User</option>
+                                <?php foreach ($users as $user): ?>
+                                    <option value="<?php echo $user['id']; ?>" <?php echo (($goal['user_id'] ?? '') == $user['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($user['username']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title">Goal Title:</label>
+                            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($goal['title'] ?? ''); ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="description">Description:</label>
-                            <textarea id="description" name="description" rows="4"><?php echo htmlspecialchars($goal_details['description']); ?></textarea>
+                            <textarea id="description" name="description" rows="4"><?php echo htmlspecialchars($goal['description'] ?? ''); ?></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="goal_type">Goal Type:</label>
                             <select id="goal_type" name="goal_type" required>
-                                <?php 
-                                $goal_types = ['weight', 'exercise_frequency', 'duration', 'distance', 'other'];
-                                foreach ($goal_types as $type): ?>
-                                    <option value="<?php echo $type; ?>" <?php echo ($goal_details['goal_type'] == $type) ? 'selected' : ''; ?>>
-                                        <?php echo ucfirst($type); ?>
-                                    </option>
-                                <?php endforeach; ?>
+                                <option value="">Select Type</option>
+                                <option value="weight_loss" <?php echo (($goal['goal_type'] ?? '') == 'weight_loss') ? 'selected' : ''; ?>>Weight Loss</option>
+                                <option value="distance" <?php echo (($goal['goal_type'] ?? '') == 'distance') ? 'selected' : ''; ?>>Distance</option>
+                                <option value="strength" <?php echo (($goal['goal_type'] ?? '') == 'strength') ? 'selected' : ''; ?>>Strength</option>
+                                <option value="endurance" <?php echo (($goal['goal_type'] ?? '') == 'endurance') ? 'selected' : ''; ?>>Endurance</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="target_value">Target Value:</label>
-                            <input type="number" step="0.01" id="target_value" name="target_value" value="<?php echo htmlspecialchars($goal_details['target_value']); ?>" required>
+                            <input type="number" id="target_value" name="target_value" step="0.01" value="<?php echo htmlspecialchars($goal['target_value'] ?? ''); ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="current_value">Current Value:</label>
-                            <input type="number" step="0.01" id="current_value" name="current_value" value="<?php echo htmlspecialchars($goal_details['current_value']); ?>">
+                            <input type="number" id="current_value" name="current_value" step="0.01" value="<?php echo htmlspecialchars($goal['current_value'] ?? '0'); ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="start_date">Start Date:</label>
-                            <input type="date" id="start_date" name="start_date" value="<?php echo htmlspecialchars($goal_details['start_date']); ?>" required>
+                            <input type="date" id="start_date" name="start_date" value="<?php echo htmlspecialchars($goal['start_date'] ?? date('Y-m-d')); ?>" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="end_date">End Date (Optional):</label>
-                            <input type="date" id="end_date" name="end_date" value="<?php echo htmlspecialchars($goal_details['end_date']); ?>">
+                            <label for="end_date">End Date:</label>
+                            <input type="date" id="end_date" name="end_date" value="<?php echo htmlspecialchars($goal['end_date'] ?? ''); ?>" required>
                         </div>
 
                         <div class="form-group">
                             <label for="status">Status:</label>
                             <select id="status" name="status" required>
-                                <?php 
-                                $statuses = ['active', 'completed', 'failed', 'cancelled'];
-                                foreach ($statuses as $status): ?>
-                                    <option value="<?php echo $status; ?>" <?php echo ($goal_details['status'] == $status) ? 'selected' : ''; ?>>
-                                        <?php echo ucfirst($status); ?>
-                                    </option>
-                                <?php endforeach; ?>
+                                <option value="in_progress" <?php echo (($goal['status'] ?? '') == 'in_progress') ? 'selected' : ''; ?>>In Progress</option>
+                                <option value="completed" <?php echo (($goal['status'] ?? '') == 'completed') ? 'selected' : ''; ?>>Completed</option>
+                                <option value="failed" <?php echo (($goal['status'] ?? '') == 'failed') ? 'selected' : ''; ?>>Failed</option>
                             </select>
                         </div>
-                        
-                        <!-- TODO: Add field for individual_exercise_id if applicable, perhaps a select dropdown -->
 
-                        <div class="form-group">
-                            <button type="submit" name="update_goal" class="button-primary">Update Goal</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <?php echo $isNewGoal ? 'Create Goal' : 'Update Goal'; ?>
+                            </button>
+                            <a href="manage_goals.php" class="btn btn-outline">Cancel</a>
                         </div>
-                    </fieldset>
-                </form>
-            <?php elseif (!$error_message):
-                echo "<p>Goal data could not be loaded.</p>";
-            endif; ?>
-        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
     </div>
-
-    <footer>
-        <p>&copy; <?php echo date("Y"); ?> Fitness Tracker Admin Panel</p>
-    </footer>
 </body>
 </html>
