@@ -2187,6 +2187,10 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
     color: var(--text-color);
 }
 
+.form-label i{
+    padding-right: 0.5rem;
+}
+
 .form-control {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -2857,4 +2861,8 @@ header, footer, .card, .auth-form, .input-icon-wrapper, select, input, textarea,
     .exercises-table .exercise-actions button {
         padding: 0.4rem;
     }
+}
+
+.form-group button {
+    margin-top: 10px;
 }

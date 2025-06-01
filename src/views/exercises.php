@@ -106,9 +106,9 @@ include 'header.php';
     </div>
     <?php endif; ?>
     <div class="mb-3 mt-4 animate__animated animate__fadeInUp">
-        <a href="index.php?page=add_exercise" class="btn btn-primary">
+        <button class="btn btn-primary" onclick="window.location.href='index.php?page=add_exercise'">
             <i class="fas fa-plus-circle me-2"></i>Přidat nové cvičení
-        </a>
+        </button>
     </div>
 </div>
 
