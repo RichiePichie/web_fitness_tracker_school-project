@@ -43,6 +43,11 @@
                     <li><a href="index.php?page=goals" <?php echo isset($_GET['page']) && $_GET['page'] === 'goals' ? 'class="active"' : ''; ?>>
                         <i class="fas fa-trophy"></i> Cíle
                     </a></li>
+                    <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin'): ?>
+                        <li><a href="admin/index.php">
+                            <i class="fas fa-user-shield"></i> Admin Panel
+                        </a></li>
+                    <?php endif; ?>
                     <li><a href="index.php?page=profile" <?php echo isset($_GET['page']) && $_GET['page'] === 'profile' ? 'class="active"' : ''; ?>>
                         <i class="fas fa-user"></i> Profil
                     </a></li>

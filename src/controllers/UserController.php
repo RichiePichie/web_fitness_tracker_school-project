@@ -79,6 +79,7 @@ class UserController {
                 if ($userId) {
                     $_SESSION['user_id'] = $userId;
                     $_SESSION['username'] = $username;
+                    $_SESSION['user_type'] = 'user'; // Default user_type for new registrations
                     
                     header('Location: index.php?page=dashboard');
                     exit;

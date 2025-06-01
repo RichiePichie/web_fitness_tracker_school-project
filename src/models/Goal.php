@@ -25,6 +25,7 @@ class Goal {
             ]);
             return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
+            $_SESSION['goal_db_error'] = 'Database Error: ' . $e->getMessage(); // Capture error
             return false;
         }
     }

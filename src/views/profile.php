@@ -4,7 +4,7 @@ include 'src/views/header.php';
 
 // Get error messages and form data if they exist
 $errors = $_SESSION['profile_errors'] ?? [];
-
+print_r($_SESSION);
 unset($_SESSION['register_errors']);
 ?>
 
