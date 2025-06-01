@@ -93,7 +93,12 @@ class GoalController {
                     header('Location: index.php?page=goals');
                     exit;
                 } else {
-                    $errors['general'] = 'Nastala chyba při přidávání cíle';
+                    if (isset($_SESSION['goal_db_error'])) {
+                        $errors['general'] = $_SESSION['goal_db_error'];
+                        unset($_SESSION['goal_db_error']); // Clear after displaying
+                    } else {
+                        $errors['general'] = 'Nastala chyba při přidávání cíle. Zkuste to prosím znovu.';
+                    }
                 }
             }
             

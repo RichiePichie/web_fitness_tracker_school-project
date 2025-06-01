@@ -3,69 +3,121 @@ require_once 'auth_check.php'; // Ensures admin is logged in
 require_once '../config.php';   // Contains PDO connection
 
 $pageTitle = "Edit Activity - Admin Panel";
-$session_id = $_GET['id'] ?? null;
-$session_details = null;
-$exercise_entries = [];
 $error_message = '';
 $success_message = '';
+$activity = null;
 
-if (!$session_id || !filter_var($session_id, FILTER_VALIDATE_INT)) {
-    $_SESSION['activity_management_error'] = 'Invalid activity ID.';
-    header('Location: activities.php');
-    exit;
-}
+// Check if this is a new activity or editing existing
+$isNewActivity = !isset($_GET['id']);
 
-// Fetch session data and associated exercises
-try {
-    $stmt_session = $pdo->prepare(
-        "SELECT ts.id, ts.user_id, ts.date, ts.total_duration, ts.total_calories_burned, ts.notes, ts.start_at, ts.end_at, u.username 
-         FROM training_sessions ts
-         JOIN users u ON ts.user_id = u.id
-         WHERE ts.id = :id"
-    );
-    $stmt_session->bindParam(':id', $session_id, PDO::PARAM_INT);
-    $stmt_session->execute();
-    $session_details = $stmt_session->fetch(PDO::FETCH_ASSOC);
-
-    if (!$session_details) {
-        $_SESSION['activity_management_error'] = 'Activity session not found.';
-        header('Location: activities.php');
-        exit;
+if (!$isNewActivity) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM training_sessions WHERE id = ?");
+        $stmt->execute([$_GET['id']]);
+        $activity = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$activity) {
+            $_SESSION['activity_management_error'] = "Activity not found.";
+            header("Location: activities.php");
+            exit;
+        }
+    } catch (PDOException $e) {
+        $error_message = "Error loading activity: " . $e->getMessage();
     }
+}
 
-    // Fetch exercise entries for this session
-    $stmt_exercises = $pdo->prepare(
-        "SELECT tee.id as entry_id, tee.individual_exercise_id, ie.name as exercise_name, ie.exercise_type, 
-                tee.sets, tee.reps, tee.weight, tee.duration as exercise_duration, tee.distance as distance, tee.calories_burned as exercise_calories
-         FROM training_exercise_entries tee
-         JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
-         WHERE tee.training_session_id = :session_id
-         ORDER BY tee.id ASC"
-    );
-    $stmt_exercises->bindParam(':session_id', $session_id, PDO::PARAM_INT);
-    $stmt_exercises->execute();
-    $exercise_entries = $stmt_exercises->fetchAll(PDO::FETCH_ASSOC);
+// Get users for dropdown
+try {
+    $stmt = $pdo->query("SELECT id, username FROM users ORDER BY username");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Get exercises for dropdown
+    $stmt = $pdo->query("SELECT id, name, exercise_type, subtype FROM individual_exercises ORDER BY name");
+    $exercises = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // If editing, get existing exercises for this activity
+    $activityExercises = [];
+    if (!$isNewActivity) {
+        $stmt = $pdo->prepare("
+            SELECT tee.*, ie.name, ie.exercise_type, ie.subtype 
+            FROM training_exercise_entries tee
+            JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
+            WHERE tee.training_session_id = ?
+        ");
+        $stmt->execute([$_GET['id']]);
+        $activityExercises = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) {
-    $error_message = "Error fetching activity data: " . $e->getMessage();
+    $error_message = "Error loading data: " . $e->getMessage();
 }
 
-// Handle session messages for feedback
-if (isset($_SESSION['edit_activity_error'])) {
-    $error_message = $_SESSION['edit_activity_error'];
-    unset($_SESSION['edit_activity_error']);
-}
-if (isset($_SESSION['edit_activity_success'])) {
-    $success_message = $_SESSION['edit_activity_success'];
-    unset($_SESSION['edit_activity_success']);
-}
-// If form data was stored due to an error, repopulate (more complex for exercises)
-if (isset($_SESSION['form_data'])) {
-    $form_data = $_SESSION['form_data'];
-    $session_details['date'] = $form_data['date'] ?? $session_details['date'];
-    $session_details['notes'] = $form_data['notes'] ?? $session_details['notes'];
-    // Repopulating exercise entries from session is more complex and usually handled by re-fetching or careful JS
-    unset($_SESSION['form_data']);
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $pdo->beginTransaction();
+
+        if ($isNewActivity) {
+            // Create new activity
+            $stmt = $pdo->prepare("INSERT INTO training_sessions (user_id, date, total_duration, total_calories_burned, notes, start_at) VALUES (?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([
+                $_POST['user_id'],
+                $_POST['date'],
+                $_POST['total_duration'],
+                $_POST['total_calories_burned'],
+                $_POST['notes']
+            ]);
+            $activityId = $pdo->lastInsertId();
+            $success_message = "Activity created successfully!";
+        } else {
+            // Update existing activity
+            $stmt = $pdo->prepare("UPDATE training_sessions SET user_id = ?, date = ?, total_duration = ?, total_calories_burned = ?, notes = ? WHERE id = ?");
+            $stmt->execute([
+                $_POST['user_id'],
+                $_POST['date'],
+                $_POST['total_duration'],
+                $_POST['total_calories_burned'],
+                $_POST['notes'],
+                $_GET['id']
+            ]);
+            $activityId = $_GET['id'];
+            
+            // Delete existing exercise entries
+            $stmt = $pdo->prepare("DELETE FROM training_exercise_entries WHERE training_session_id = ?");
+            $stmt->execute([$activityId]);
+        }
+
+        // Add exercise entries if any were submitted
+        if (isset($_POST['exercises']) && is_array($_POST['exercises'])) {
+            $stmt = $pdo->prepare("
+                INSERT INTO training_exercise_entries 
+                (training_session_id, individual_exercise_id, sets, reps, weight, duration, distance, calories_burned) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            foreach ($_POST['exercises'] as $exercise) {
+                if (empty($exercise['exercise_id'])) continue;
+                
+                $stmt->execute([
+                    $activityId,
+                    $exercise['exercise_id'],
+                    $exercise['sets'] ?? null,
+                    $exercise['reps'] ?? null,
+                    $exercise['weight'] ?? null,
+                    $exercise['duration'] ?? null,
+                    $exercise['distance'] ?? null,
+                    $exercise['calories_burned'] ?? null
+                ]);
+            }
+        }
+
+        $pdo->commit();
+        $_SESSION['activity_management_success'] = $success_message;
+        header("Location: activities.php");
+        exit;
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        $error_message = "Error saving activity: " . $e->getMessage();
+    }
 }
 
 ?>
@@ -76,130 +128,263 @@ if (isset($_SESSION['form_data'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <link rel="stylesheet" href="../public/css/styles.css">
+    <link rel="stylesheet" href="../public/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body>
-    <header>
-        <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
-    </header>
-
-    <nav>
-        <ul>
-            <li><a href="../index.php" target="_blank">View Main Site</a></li>
-            <li><a href="index.php">Dashboard</a></li>
-            <li><a href="users.php">Manage Users</a></li>
-            <li><a href="activities.php">Manage Activities</a></li>
-            <li><a href="settings.php">Settings</a></li>
-            <li><a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['admin_username']); ?>)</a></li>
-        </ul>
-    </nav>
-
-    <div class="container">
-        <div class="content">
-            <a href="activities.php" class="back-link">&laquo; Back to Activities List</a>
-            <h2>Edit Activity Session (ID: <?php echo htmlspecialchars($session_id); ?>)</h2>
-            <p><strong>User:</strong> <?php echo htmlspecialchars($session_details['username'] ?? 'N/A'); ?></p>
-
-            <?php if ($error_message): ?>
-                <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
-            <?php endif; ?>
-            <?php if ($success_message): ?>
-                <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
-            <?php endif; ?>
-
-            <?php if ($session_details && !$error_message): ?>
-            <form action="update_activity.php" method="post">
-                <input type="hidden" name="session_id" value="<?php echo htmlspecialchars($session_details['id']); ?>">
-                <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($session_details['user_id']); ?>">
-
-                <h3>Session Details</h3>
-                <div class="form-group">
-                    <label for="date">Date:</label>
-                    <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($session_details['date'] ?? ''); ?>" required>
+<body class="admin-body">
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-logo">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>Fitness Admin</span>
+                </h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3 class="nav-title">Navigation</h3>
+                    <ul>
+                        <li>
+                            <a href="index.php">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="users.php">
+                                <i class="fas fa-users"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="activities.php" class="active">
+                                <i class="fas fa-running"></i>
+                                <span>Activities</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="manage_goals.php">
+                                <i class="fas fa-bullseye"></i>
+                                <span>Goals</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="logout.php" class="logout-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="form-group">
-                    <label for="start_at">Start Time (HH:MM:SS or HH:MM):</label>
-                    <input type="text" id="start_at" name="start_at" value="<?php echo htmlspecialchars(substr($session_details['start_at'], 11, 8) ?? ''); ?>" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?">
-                    <small>Original full start time: <?php echo htmlspecialchars($session_details['start_at'] ?? ''); ?></small>
-                </div>
-                 <div class="form-group">
-                    <label for="end_at">End Time (HH:MM:SS or HH:MM, optional):</label>
-                    <input type="text" id="end_at" name="end_at" value="<?php echo htmlspecialchars(substr($session_details['end_at'] ?? '', 11, 8) ?? ''); ?>" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?">
-                     <small>Original full end time: <?php echo htmlspecialchars($session_details['end_at'] ?? 'Not set'); ?></small>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notes:</label>
-                    <textarea id="notes" name="notes"><?php echo htmlspecialchars($session_details['notes'] ?? ''); ?></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="total_duration">Total Duration (minutes, optional, will be auto-calculated if exercises have duration):</label>
-                    <input type="number" id="total_duration" name="total_duration" value="<?php echo htmlspecialchars($session_details['total_duration'] ?? ''); ?>" min="0" step="1">
-                </div>
-                <div class="form-group">
-                    <label for="total_calories_burned">Total Calories Burned (optional, will be auto-calculated if exercises have calories):</label>
-                    <input type="number" id="total_calories_burned" name="total_calories_burned" value="<?php echo htmlspecialchars($session_details['total_calories_burned'] ?? ''); ?>" min="0" step="1">
-                </div>
+            </nav>
+        </aside>
 
-                <h3>Logged Exercises</h3>
-                <?php if (!empty($exercise_entries)): ?>
-                    <table class="exercise-table">
-                        <thead>
-                            <tr>
-                                <th>Exercise Name</th>
-                                <th>Type</th>
-                                <th>Sets</th>
-                                <th>Reps</th>
-                                <th>Weight (kg)</th>
-                                <th>Duration (min)</th>
-                                <th>Distance (km)</th>
-                                <th>Calories</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($exercise_entries as $index => $entry): ?>
-                                <tr>
-                                    <td>
-                                        <?php echo htmlspecialchars($entry['exercise_name']); ?>
-                                        <input type="hidden" name="entries[<?php echo $index; ?>][entry_id]" value="<?php echo htmlspecialchars($entry['entry_id']); ?>">
-                                        <input type="hidden" name="entries[<?php echo $index; ?>][individual_exercise_id]" value="<?php echo htmlspecialchars($entry['individual_exercise_id']); ?>">
-                                    </td>
-                                    <td><?php echo htmlspecialchars($entry['exercise_type']); ?></td>
-                                    <td><input type="number" name="entries[<?php echo $index; ?>][sets]" value="<?php echo htmlspecialchars($entry['sets'] ?? ''); ?>" min="0"></td>
-                                    <td><input type="number" name="entries[<?php echo $index; ?>][reps]" value="<?php echo htmlspecialchars($entry['reps'] ?? ''); ?>" min="0"></td>
-                                    <td><input type="number" step="0.01" name="entries[<?php echo $index; ?>][weight]" value="<?php echo htmlspecialchars($entry['weight'] ?? ''); ?>" min="0"></td>
-                                    <td><input type="number" name="entries[<?php echo $index; ?>][duration]" value="<?php echo htmlspecialchars($entry['exercise_duration'] ?? ''); ?>" min="0"></td>
-                                    <td><input type="number" step="0.01" name="entries[<?php echo $index; ?>][distance]" value="<?php echo htmlspecialchars($entry['distance'] ?? ''); ?>" min="0"></td>
-                                    <td><input type="number" name="entries[<?php echo $index; ?>][calories]" value="<?php echo htmlspecialchars($entry['exercise_calories'] ?? ''); ?>" min="0"></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php else: ?>
-                    <p>No specific exercises were logged for this session. You can add them if this feature is implemented.</p>
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-content">
+                    <h1><?php echo $isNewActivity ? 'Add New Activity' : 'Edit Activity'; ?></h1>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <?php if ($error_message): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
                 <?php endif; ?>
-                
-                <!-- Placeholder for adding new exercises to the session -->
-                <!-- <button type="button" id="addExerciseButton">Add Another Exercise</button> -->
 
-                <div class="form-actions">
-                    <button type="submit">Update Activity</button>
-                    <a href="activity_details.php?id=<?php echo htmlspecialchars($session_id); ?>">Cancel</a>
+                <div class="content-card">
+                    <form method="POST" class="admin-form">
+                        <div class="form-group">
+                            <label for="user_id">User:</label>
+                            <select id="user_id" name="user_id" required>
+                                <option value="">Select User</option>
+                                <?php foreach ($users as $user): ?>
+                                    <option value="<?php echo $user['id']; ?>" <?php echo (($activity['user_id'] ?? '') == $user['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($user['username']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date">Date:</label>
+                            <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($activity['date'] ?? date('Y-m-d')); ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="total_duration">Duration (minutes):</label>
+                            <input type="number" id="total_duration" name="total_duration" value="<?php echo htmlspecialchars($activity['total_duration'] ?? ''); ?>" required min="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="total_calories_burned">Calories Burned:</label>
+                            <input type="number" id="total_calories_burned" name="total_calories_burned" value="<?php echo htmlspecialchars($activity['total_calories_burned'] ?? ''); ?>" required min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Notes:</label>
+                            <textarea id="notes" name="notes" rows="4"><?php echo htmlspecialchars($activity['notes'] ?? ''); ?></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Exercises:</label>
+                            <div id="exercises-container">
+                                <?php if (!empty($activityExercises)): ?>
+                                    <?php foreach ($activityExercises as $index => $exercise): ?>
+                                        <div class="exercise-entry">
+                                            <select name="exercises[<?php echo $index; ?>][exercise_id]" class="exercise-select" required>
+                                                <option value="">Select Exercise</option>
+                                                <?php foreach ($exercises as $ex): ?>
+                                                    <option value="<?php echo $ex['id']; ?>" 
+                                                            data-type="<?php echo $ex['exercise_type']; ?>"
+                                                            data-subtype="<?php echo $ex['subtype']; ?>"
+                                                            <?php echo ($exercise['individual_exercise_id'] == $ex['id']) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($ex['name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="exercise-details">
+                                                <div class="sets-reps-weight" style="display: <?php echo in_array($exercise['subtype'], ['RepsSetsWeight', 'Reps']) ? 'flex' : 'none'; ?>">
+                                                    <input type="number" name="exercises[<?php echo $index; ?>][sets]" placeholder="Sets" value="<?php echo htmlspecialchars($exercise['sets'] ?? ''); ?>" min="1">
+                                                    <input type="number" name="exercises[<?php echo $index; ?>][reps]" placeholder="Reps" value="<?php echo htmlspecialchars($exercise['reps'] ?? ''); ?>" min="1">
+                                                    <?php if ($exercise['subtype'] === 'RepsSetsWeight'): ?>
+                                                        <input type="number" name="exercises[<?php echo $index; ?>][weight]" placeholder="Weight (kg)" value="<?php echo htmlspecialchars($exercise['weight'] ?? ''); ?>" step="0.1" min="0">
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="duration-distance" style="display: <?php echo $exercise['subtype'] === 'Distance' ? 'flex' : 'none'; ?>">
+                                                    <input type="number" name="exercises[<?php echo $index; ?>][distance]" placeholder="Distance (km)" value="<?php echo htmlspecialchars($exercise['distance'] ?? ''); ?>" step="0.01" min="0">
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-icon btn-danger remove-exercise" title="Remove Exercise">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="btn btn-outline" id="add-exercise">
+                                <i class="fas fa-plus"></i> Add Exercise
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <?php echo $isNewActivity ? 'Create Activity' : 'Update Activity'; ?>
+                            </button>
+                            <a href="activities.php" class="btn btn-outline">Cancel</a>
+                        </div>
+                    </form>
                 </div>
-            </form>
-            <?php elseif (!$error_message): ?>
-                <p>Activity session data could not be loaded.</p>
-            <?php endif; ?>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <footer>
-        <p>&copy; <?php echo date("Y"); ?> Fitness Tracker Admin Panel</p>
-    </footer>
-    <!-- Script for potential future enhancements like adding exercises dynamically -->
-    <!-- <script>
-        document.getElementById('addExerciseButton')?.addEventListener('click', function() {
-            // Logic to add a new row to the exercises table
-            alert('Functionality to add new exercises dynamically to be implemented.');
+    <template id="exercise-template">
+        <div class="exercise-entry">
+            <select name="exercises[INDEX][exercise_id]" class="exercise-select" required>
+                <option value="">Select Exercise</option>
+                <?php foreach ($exercises as $exercise): ?>
+                    <option value="<?php echo $exercise['id']; ?>" 
+                            data-type="<?php echo $exercise['exercise_type']; ?>"
+                            data-subtype="<?php echo $exercise['subtype']; ?>">
+                        <?php echo htmlspecialchars($exercise['name']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <div class="exercise-details">
+                <div class="sets-reps-weight" style="display: none">
+                    <input type="number" name="exercises[INDEX][sets]" placeholder="Sets" min="1">
+                    <input type="number" name="exercises[INDEX][reps]" placeholder="Reps" min="1">
+                    <input type="number" name="exercises[INDEX][weight]" placeholder="Weight (kg)" step="0.1" min="0" class="weight-input">
+                </div>
+                <div class="duration-distance" style="display: none">
+                    <input type="number" name="exercises[INDEX][distance]" placeholder="Distance (km)" step="0.01" min="0">
+                </div>
+            </div>
+            <button type="button" class="btn btn-icon btn-danger remove-exercise" title="Remove Exercise">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('exercises-container');
+            const addButton = document.getElementById('add-exercise');
+            const template = document.getElementById('exercise-template');
+            let exerciseCount = <?php echo !empty($activityExercises) ? count($activityExercises) : 0; ?>;
+
+            function updateExerciseFields(select) {
+                const entry = select.closest('.exercise-entry');
+                const option = select.selectedOptions[0];
+                const subtype = option?.dataset?.subtype;
+                
+                const setsRepsWeight = entry.querySelector('.sets-reps-weight');
+                const durationDistance = entry.querySelector('.duration-distance');
+                const weightInput = entry.querySelector('.weight-input');
+                
+                setsRepsWeight.style.display = ['RepsSetsWeight', 'Reps'].includes(subtype) ? 'flex' : 'none';
+                durationDistance.style.display = subtype === 'Distance' ? 'flex' : 'none';
+                
+                if (weightInput) {
+                    weightInput.style.display = subtype === 'RepsSetsWeight' ? 'block' : 'none';
+                }
+            }
+
+            function addExercise(event) {
+                event.preventDefault();
+                const clone = template.content.cloneNode(true);
+                const newEntry = clone.querySelector('.exercise-entry');
+                
+                // Update indices
+                newEntry.querySelectorAll('[name*="[INDEX]"]').forEach(element => {
+                    element.name = element.name.replace('INDEX', exerciseCount);
+                });
+                
+                // Add event listeners
+                const select = newEntry.querySelector('.exercise-select');
+                select.addEventListener('change', () => updateExerciseFields(select));
+                
+                newEntry.querySelector('.remove-exercise').addEventListener('click', function() {
+                    newEntry.remove();
+                });
+                
+                container.appendChild(newEntry);
+                exerciseCount++;
+            }
+
+            // Add event listener to add button
+            addButton.addEventListener('click', addExercise);
+
+            // Add event listeners to existing exercise selects
+            document.querySelectorAll('.exercise-select').forEach(select => {
+                select.addEventListener('change', () => updateExerciseFields(select));
+            });
+
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-exercise').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.exercise-entry').remove();
+                });
+            });
+
+            // Add at least one exercise entry if none exist
+            if (exerciseCount === 0) {
+                addExercise();
+            }
         });
-    </script> -->
+    </script>
 </body>
 </html>

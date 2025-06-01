@@ -35,7 +35,7 @@ class Exercise {
         
         try {
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
+            $executionSuccess = $stmt->execute([
                 ':trainingSessionId' => $trainingSessionId,
                 ':individualExerciseId' => $individualExerciseId,
                 ':sets' => $sets,
@@ -43,9 +43,25 @@ class Exercise {
                 ':weight' => $weight,
                 ':distance' => $distance
             ]);
-            return true;
+
+            if ($executionSuccess) {
+                $rowCount = $stmt->rowCount();
+                if ($rowCount > 0) {
+                    error_log("ÚSPĚCH: Cvik (ID: $individualExerciseId) úspěšně přidán do tréninkové jednotky (ID: $trainingSessionId). Počet ovlivněných řádků: $rowCount");
+                    return true;
+                } else {
+                    error_log("VAROVÁNÍ: Metoda addExerciseToSession sice proběhla bez PDO výjimky, ale nebyly vloženy žádné řádky pro cvik (ID: $individualExerciseId) do tréninkové jednotky (ID: $trainingSessionId).");
+                    return false;
+                }
+            } else {
+                // Toto by se teoreticky nemělo stát, pokud je ERRMODE_EXCEPTION zapnutý a execute selže, měla by být vyvolána výjimka.
+                // Ale pro jistotu logujeme.
+                $errorInfo = $stmt->errorInfo();
+                error_log("CHYBA: $stmt->execute() v addExerciseToSession vrátilo false. PDO error info: " . print_r($errorInfo, true));
+                return false;
+            }
         } catch (PDOException $e) {
-            error_log("Chyba při přidávání cviku do tréninku: " . $e->getMessage());
+            error_log("PDO CHYBA při přidávání cviku (ID: $individualExerciseId) do tréninkové jednotky (ID: $trainingSessionId): " . $e->getMessage());
             return false;
         }
     }
@@ -54,7 +70,7 @@ class Exercise {
     public function getTrainingSessionById($id) {
         $sql = "SELECT ts.*, 
                 GROUP_CONCAT(
-                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance)
+                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance, '|', ie.exercise_type, '|', tee.individual_exercise_id)
                     SEPARATOR '||'
                 ) as exercises
                 FROM training_sessions ts
@@ -70,9 +86,10 @@ class Exercise {
 
     // Získání všech tréninkových jednotek uživatele
     public function getAllTrainingSessionsByUser($userId, $limit = null, $offset = 0) {
+        
         $sql = "SELECT ts.*, 
                 GROUP_CONCAT(
-                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance)
+                    CONCAT(ie.name, '|', tee.sets, '|', tee.reps, '|', tee.weight, '|', tee.distance, '|', ie.exercise_type)
                     SEPARATOR '||'
                 ) as exercises
                 FROM training_sessions ts

@@ -44,12 +44,10 @@ CREATE TABLE IF NOT EXISTS training_exercise_entries (
     id INT AUTO_INCREMENT PRIMARY KEY,
     training_session_id INT NOT NULL,
     individual_exercise_id INT NOT NULL,
-    sets INT NULL, -- Počet sérií (pro strength)
-    reps INT NULL, -- Počet opakování na sérii (pro strength)
-    weight DECIMAL(5,2) NULL, -- Použitá váha (pro strength)
-    duration INT NULL, -- Doba trvání cviku v minutách
-    distance DECIMAL(10,2) NULL, -- Uražená vzdálenost (pro cardio)
-    calories_burned INT NULL, -- Spálené kalorie pro tento cvik
+    sets INT DEFAULT 0,
+    reps INT DEFAULT 0,
+    weight DECIMAL(5,2) DEFAULT 0,
+    distance DECIMAL(10,2) DEFAULT 0,
     FOREIGN KEY (training_session_id) REFERENCES training_sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (individual_exercise_id) REFERENCES individual_exercises(id) ON DELETE CASCADE
 );
