@@ -343,7 +343,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            function addExercise() {
+            function addExercise(event) {
+                event.preventDefault();
                 const clone = template.content.cloneNode(true);
                 const newEntry = clone.querySelector('.exercise-entry');
                 
