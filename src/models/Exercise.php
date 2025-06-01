@@ -166,5 +166,50 @@ class Exercise {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Získání všech individuálních cvičení
+    public function getAllExercises() {
+        $sql = "SELECT *
+                FROM individual_exercises 
+                ORDER BY exercise_type, name";
+        
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Chyba při získávání seznamu cvičení: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Získání individuálního cvičení podle ID
+    public function getExerciseById($id) {
+        $sql = "SELECT id, name, description, exercise_type 
+                FROM individual_exercises 
+                WHERE id = :id";
+        
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Chyba při získávání cvičení podle ID: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Metody pro práci s transakcemi
+    public function beginTransaction() {
+        $this->pdo->beginTransaction();
+    }
+
+    public function commitTransaction() {
+        $this->pdo->commit();
+    }
+
+    public function rollbackTransaction() {
+        $this->pdo->rollBack();
+    }
 }
 ?> 

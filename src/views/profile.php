@@ -12,8 +12,6 @@ unset($_SESSION['register_errors']);
     <section class="card">
         <h2>Můj profil</h2>
 
-        <?php print_r($_SESSION);?>
-
         <?php if (!empty($_SESSION['profile_updated'])): ?>
             <div class="alert alert-success">Profil byl úspěšně aktualizován.</div>
             <?php unset($_SESSION['profile_updated']); ?>
