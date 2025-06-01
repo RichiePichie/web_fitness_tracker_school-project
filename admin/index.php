@@ -108,6 +108,12 @@ try {
                             </a>
                         </li>
                         <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="manage_goals.php">
                                 <i class="fas fa-bullseye"></i>
                                 <span>Goals</span>
@@ -255,6 +261,10 @@ try {
                             <a href="manage_goals.php" class="quick-action-btn">
                                 <i class="fas fa-bullseye"></i>
                                 <span>Goals</span>
+                            </a>
+                            <a href="exercises.php" class="quick-action-btn">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
                             </a>
                         </div>
                     </div>

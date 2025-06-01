@@ -61,6 +61,12 @@ try {
                             </a>
                         </li>
                         <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="manage_goals.php">
                                 <i class="fas fa-bullseye"></i>
                                 <span>Goals</span>
@@ -185,7 +191,7 @@ try {
                                             </td>
                                             <td class="actions">
                                                 <div class="action-buttons">
-                                                    <button class="btn btn-icon btn-info" title="View Details" onclick="location.href='edit_user.php?id=<?php echo $user['id']; ?>&view=true'">
+                                                    <button class="btn btn-icon btn-info" title="View Details" onclick="location.href='user_details.php?id=<?php echo $user['id']; ?>'">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="btn btn-icon btn-warning" title="Edit User" onclick="location.href='edit_user.php?id=<?php echo $user['id']; ?>'">
