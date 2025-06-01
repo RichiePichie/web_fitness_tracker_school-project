@@ -48,18 +48,19 @@ include 'header.php';
                 </thead>
                 <tbody>
                     <?php foreach ($exercises as $exercise): ?>
+                        <?php if (!is_array($exercise)) { continue; } // Skip if $exercise is not an array ?>
                         <tr>
-                            <td><?php echo htmlspecialchars(date('d.m.Y', strtotime($exercise['date']))); ?></td>
-                            <td><?php echo htmlspecialchars($exercise['title']); ?></td>
-                            <td><?php echo htmlspecialchars($exercise['exercise_type']); ?></td>
-                            <td><?php echo htmlspecialchars($exercise['duration']); ?></td>
-                            <td><?php echo htmlspecialchars($exercise['calories_burned']); ?></td>
+                            <td><?php $dateValue = $exercise['date'] ?? null; echo htmlspecialchars($dateValue ? date('d.m.Y', strtotime($dateValue)) : 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($exercise['title'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($exercise['exercise_type'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($exercise['duration'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($exercise['calories_burned'] ?? 'N/A'); ?></td>
                             <td>
-                                <a href="index.php?page=edit_exercise&id=<?php echo $exercise['id']; ?>" 
+                                <a href="index.php?page=edit_exercise&id=<?php echo htmlspecialchars($exercise['id'] ?? ''); ?>" 
                                    class="btn btn-sm btn-primary">Upravit</a>
                                 <form action="index.php?page=delete_exercise" method="post" class="d-inline" 
                                       onsubmit="return confirm('Opravdu chcete smazat toto cvičení?');">
-                                    <input type="hidden" name="id" value="<?php echo $exercise['id']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($exercise['id'] ?? ''); ?>">
                                     <button type="submit" class="btn btn-sm btn-danger">Smazat</button>
                                 </form>
                             </td>

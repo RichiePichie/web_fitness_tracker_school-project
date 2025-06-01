@@ -82,23 +82,24 @@ $goalModel->checkGoalStatus($userId);
                         <div class="exercise-item">
                             <div class="exercise-icon">
                                 <?php 
-                                $icon = 'dumbbell';
-                                if ($exercise['exercise_type'] === 'cardio') {
+                                $icon = 'dumbbell'; // Default icon
+                                $exerciseType = $exercise['exercise_type'] ?? ''; // Safely get exercise_type, default to empty string
+                                if ($exerciseType === 'cardio') {
                                     $icon = 'running';
-                                } elseif ($exercise['exercise_type'] === 'flexibility') {
+                                } elseif ($exerciseType === 'flexibility') {
                                     $icon = 'child';
-                                } elseif ($exercise['exercise_type'] === 'balance') {
+                                } elseif ($exerciseType === 'balance') {
                                     $icon = 'balance-scale';
                                 }
                                 ?>
                                 <i class="fas fa-<?php echo $icon; ?>"></i>
                             </div>
                             <div class="exercise-info">
-                                <h4><?php echo htmlspecialchars($exercise['title']); ?></h4>
+                                <h4><?php echo htmlspecialchars($exercise['title'] ?? 'N/A'); ?></h4>
                                 <p class="exercise-date"><?php echo date('d.m.Y', strtotime($exercise['date'])); ?></p>
                                 <p>
-                                    <span class="exercise-duration"><?php echo $exercise['duration']; ?> min</span>
-                                    <span class="exercise-calories"><?php echo $exercise['calories_burned']; ?> kcal</span>
+                                    <span class="exercise-duration"><?php echo htmlspecialchars($exercise['duration'] ?? 'N/A'); ?> min</span>
+                                    <span class="exercise-calories"><?php echo htmlspecialchars($exercise['calories_burned'] ?? 'N/A'); ?> kcal</span>
                                 </p>
                             </div>
                         </div>
