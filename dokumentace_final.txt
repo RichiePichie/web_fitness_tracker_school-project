@@ -1,0 +1,297 @@
+===========================================
+DOKUMENTACE PROJEKTU - FITNESS TRACKER
+===========================================
+
+------------------[ STRANA 1 ]------------------
+
+Autoři:
+- Adam Přeček (a.precek.st@spseiostrava.cz)
+- Daniel Palovský (d.palovsky.st@spseiostrava.cz)
+- Richard Pokuta (r.pokuta.st@spseiostrava.cz)
+
+Třída: I3C
+Školní rok: 2024/2025
+Název projektu: Fitness Tracker
+Téma: Webová aplikace pro sledování fitness aktivit
+URL aplikace: http://localhost/fitness-tracker/
+
+OBSAH DOKUMENTACE:
+1. Úvod a popis projektu (strana 2)
+2. Rozdělení úkolů v týmu (strana 2)
+3. Postup při tvorbě aplikace (strana 3)
+4. Schéma databáze (strana 4-5)
+5. Struktura aplikace (strana 5)
+6. Vybraný PHP kód (strana 6)
+7. Základní HTML struktura (strana 6)
+8. CSS layout (strana 7)
+9. Manuál aplikace (strana 8)
+
+------------------[ STRANA 2 ]------------------
+
+1. ÚVOD
+-------------------------------------------
+Fitness Tracker je webová aplikace navržená pro uživatele, kteří chtějí efektivně sledovat své cvičební aktivity, nastavovat si fitness cíle a monitorovat svůj pokrok. Projekt vznikl jako odpověď na rostoucí potřebu digitálních nástrojů pro podporu zdravého životního stylu a fitness aktivit.
+
+Důvody výběru tématu:
+1. Aktuálnost - Rostoucí zájem o fitness a zdravý životní styl
+2. Praktické využití - Aplikace řeší reálnou potřebu uživatelů
+3. Technologická výzva - Možnost implementace různých funkcí a technologií
+4. Škálovatelnost - Potenciál pro budoucí rozšíření a vylepšení
+
+2. ROZDĚLENÍ ÚKOLŮ
+-------------------------------------------
+Adam Přeček:
+- Návrh a implementace databázové struktury
+- Backend vývoj (PHP modely a kontrolery)
+- Správa verzí a Git repozitáře
+- Dokumentace projektu
+
+Daniel Palovský:
+- Frontend development (HTML, CSS)
+- Uživatelské rozhraní a UX design
+- Responsivní design
+- Implementace grafů a vizualizací
+
+Richard Pokuta:
+- Implementace autentizace a autorizace
+- Admin panel a jeho funkcionality
+- Testování a debugging
+- Optimalizace výkonu
+
+------------------[ STRANA 3 ]------------------
+
+3. POSTUP PŘI TVORBĚ
+-------------------------------------------
+1. Fáze plánování (2 týdny):
+   - Analýza požadavků
+   - Návrh databázové struktury
+   - Wireframy uživatelského rozhraní
+   - Výběr technologií
+
+2. Fáze vývoje (8 týdnů):
+   - Vytvoření databáze a základní struktury
+   - Implementace autentizace
+   - Vývoj základních funkcí (CRUD operace)
+   - Tvorba uživatelského rozhraní
+   - Implementace admin panelu
+
+3. Fáze testování (2 týdny):
+   - Unit testy
+   - Uživatelské testování
+   - Oprava chyb
+   - Optimalizace výkonu
+
+4. Fáze dokumentace (1 týden):
+   - Tvorba technické dokumentace
+   - Příprava uživatelského manuálu
+   - Finalizace projektu
+
+------------------[ STRANA 4 ]------------------
+
+4. SCHÉMA DATABÁZE
+-------------------------------------------
+[Zde bude vložen obrázek schématu databáze]
+
+Popis tabulek:
+
+1. users
+   - id (INT, PK): Unikátní identifikátor uživatele
+   - username (VARCHAR): Uživatelské jméno
+   - email (VARCHAR): Email uživatele
+   - password (VARCHAR): Hashované heslo
+   - user_type (ENUM): Typ uživatele (user/admin)
+   - gender (ENUM): Pohlaví
+   - height (DECIMAL): Výška v cm
+   - weight (DECIMAL): Váha v kg
+   - date_of_birth (DATE): Datum narození
+
+2. training_sessions
+   - id (INT, PK): ID tréninku
+   - user_id (INT, FK): Odkaz na uživatele
+   - date (DATE): Datum tréninku
+   - total_duration (INT): Celková doba trvání
+   - total_calories_burned (INT): Celkové spálené kalorie
+   - notes (TEXT): Poznámky k tréninku
+
+------------------[ STRANA 5 ]------------------
+
+3. individual_exercises
+   - id (INT, PK): ID cviku
+   - name (VARCHAR): Název cviku
+   - description (TEXT): Popis cviku
+   - exercise_type (ENUM): Typ cvičení
+   - subtype (ENUM): Podtyp cvičení
+
+4. training_exercise_entries
+   - id (INT, PK): ID záznamu
+   - training_session_id (INT, FK): Odkaz na trénink
+   - individual_exercise_id (INT, FK): Odkaz na cvik
+   - sets (INT): Počet sérií
+   - reps (INT): Počet opakování
+   - weight (DECIMAL): Použitá váha
+   - duration (INT): Doba trvání
+   - distance (DECIMAL): Vzdálenost
+
+5. STRUKTURA APLIKACE
+-------------------------------------------
+Hlavní adresáře a soubory:
+
+/
+├── admin/                    # Administrátorské rozhraní
+│   ├── index.php            # Dashboard
+│   ├── users.php            # Správa uživatelů
+│   ├── activities.php       # Správa aktivit
+│   └── manage_goals.php     # Správa cílů
+├── public/                  # Veřejné soubory
+│   ├── css/                 # Styly
+│   ├── js/                  # JavaScript
+│   └── images/             # Obrázky
+├── src/                     # Zdrojové kódy
+│   ├── models/             # Datové modely
+│   └── controllers/        # Kontrolery
+├── config.php              # Konfigurace
+└── index.php              # Hlavní vstupní bod
+
+------------------[ STRANA 6 ]------------------
+
+6. VYBRANÝ PHP KÓD
+-------------------------------------------
+Příklad implementace třídy Exercise:
+
+```php
+class Exercise {
+    private $pdo;
+
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+
+    // Vytvoření nové tréninkové jednotky
+    public function createTrainingSession($userId, $date, $totalDuration = null, 
+                                        $totalCaloriesBurned = null, $notes = null) {
+        $sql = "INSERT INTO training_sessions (user_id, date, total_duration, 
+                total_calories_burned, notes) 
+                VALUES (:userId, :date, :totalDuration, :totalCaloriesBurned, :notes)";
+        
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':userId' => $userId,
+                ':date' => $date,
+                ':totalDuration' => $totalDuration,
+                ':totalCaloriesBurned' => $totalCaloriesBurned,
+                ':notes' => $notes
+            ]);
+            return $this->pdo->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Chyba při vytváření tréninkové jednotky: " . $e->getMessage());
+            return false;
+        }
+    }
+}
+```
+
+7. ZÁKLADNÍ HTML STRUKTURA
+-------------------------------------------
+Aplikace používá moderní HTML5 strukturu:
+
+```html
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <!-- Navigační menu -->
+        </nav>
+    </header>
+    
+    <main>
+        <!-- Hlavní obsah stránky -->
+    </main>
+    
+    <footer>
+        <!-- Patička -->
+    </footer>
+</body>
+</html>
+```
+
+------------------[ STRANA 7 ]------------------
+
+8. CSS LAYOUT
+-------------------------------------------
+Aplikace využívá moderní CSS přístup:
+
+1. Responzivní design:
+   - Flexbox pro flexibilní layouty
+   - CSS Grid pro komplexní rozložení
+   - Media queries pro různé velikosti obrazovek
+
+2. Barevné schéma:
+   - Primární: #4f46e5
+   - Sekundární: #f472b6
+   - Pozadí: #f1f5f9
+   - Text: #1e293b
+
+3. Komponenty:
+   - Karty s box-shadow
+   - Zaoblené rohy (border-radius)
+   - Animované přechody
+
+4. Struktura CSS:
+   - Využití CSS proměnných
+   - BEM metodologie
+   - Modularní přístup
+
+------------------[ STRANA 8 ]------------------
+
+9. MANUÁL APLIKACE
+-------------------------------------------
+[Screenshot 1: Přihlašovací obrazovka]
+
+1. Registrace a přihlášení:
+   - Klikněte na "Registrovat"
+   - Vyplňte požadované údaje
+   - Potvrďte registraci
+   - Přihlaste se pomocí emailu a hesla
+
+[Screenshot 2: Dashboard]
+
+2. Přidání nového tréninku:
+   - Na dashboardu klikněte "Nový trénink"
+   - Vyberte datum a typ aktivity
+   - Vyplňte detaily (série, opakování, váha)
+   - Uložte trénink
+
+[Screenshot 3: Přehled cílů]
+
+3. Nastavení fitness cíle:
+   - V menu vyberte "Moje cíle"
+   - Klikněte "Nový cíl"
+   - Zadejte název, typ a cílovou hodnotu
+   - Nastavte datum dosažení
+   - Uložte cíl
+
+[Screenshot 4: Statistiky]
+
+4. Zobrazení statistik:
+   - V menu vyberte "Statistiky"
+   - Prohlížejte grafy pokroku
+   - Filtrujte podle období
+   - Exportujte data (volitelně)
+
+[Screenshot 5: Admin panel]
+
+5. Administrace (pro admin účty):
+   - Přihlaste se jako admin
+   - Spravujte uživatele
+   - Kontrolujte aktivity
+   - Upravujte systémová nastavení
+
+=========================================== 
