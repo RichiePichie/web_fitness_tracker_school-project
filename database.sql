@@ -66,11 +66,9 @@ CREATE TABLE IF NOT EXISTS user_goals (
     start_date DATE NOT NULL,
     end_date DATE,
     status ENUM('active', 'completed', 'failed', 'cancelled') DEFAULT 'active',
-    individual_exercise_id INT DEFAULT NULL, -- Volitelné propojení s konkrétním cvikem
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (individual_exercise_id) REFERENCES individual_exercises(id) ON DELETE SET NULL
 );
 
 -- Přidání cvičení do tabulky individual_exercises

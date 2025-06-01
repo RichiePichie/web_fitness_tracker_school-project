@@ -56,6 +56,21 @@ unset($_SESSION['exercise_errors']);
         <h4>Upravit trénink</h4>
     </div>
     
+    <?php if (isset($_SESSION['success_message'])): ?>
+        <div class="alert alert-success">
+            <?php 
+            echo $_SESSION['success_message'];
+            unset($_SESSION['success_message']);
+            ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($errors['general'])): ?>
+        <div class="alert alert-error">
+            <?php echo $errors['general']; ?>
+        </div>
+    <?php endif; ?>
+    
     <!-- Předání dat do JavaScriptu -->
     <script>
         const selectedExercises = <?php echo json_encode($selectedExercises); ?>;
@@ -83,12 +98,53 @@ unset($_SESSION['exercise_errors']);
                 <?php endif; ?>
             </div>
 
+            <!-- Délka tréninku a spálené kalorie -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-clock text-primary me-1"></i>Délka tréninku - min
+                    </label>
+                    <div class="input-group">
+                        <input type="number" 
+                                class="form-control <?php echo isset($errors['duration']) ? 'is-invalid' : ''; ?>" 
+                                name="duration"
+                                value="<?php echo htmlspecialchars($data['duration'] ?? $exercise['total_duration'] ?? ''); ?>"
+                                min="0"
+                                step="1">
+                    </div>
+                    <?php if (isset($errors['duration'])): ?>
+                        <div class="invalid-feedback"><?php echo $errors['duration']; ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-fire text-danger me-1"></i>Spálené kalorie - kcal
+                    </label>
+                    <div class="input-group">
+                        <input type="number" 
+                                class="form-control <?php echo isset($errors['calories_burned']) ? 'is-invalid' : ''; ?>"
+                                name="calories_burned"
+                                value="<?php echo htmlspecialchars($data['calories_burned'] ?? $exercise['total_calories_burned'] ?? ''); ?>"
+                                min="0"
+                                step="1">
+                    </div>
+                    <?php if (isset($errors['calories_burned'])): ?>
+                        <div class="invalid-feedback"><?php echo $errors['calories_burned']; ?></div>
+                    <?php endif; ?>
+                    <div class="form-text text-muted">Odhadovaný počet spálených kalorií</div>
+                </div>
+            </div>
+
             <!-- Seznam cviků -->
             <div class="form-group">
                 <label class="form-label">
                     Cviky
                     <span class="required-mark">*</span>
                 </label>
+                <?php if (isset($errors['exercises'])): ?>
+                    <div class="invalid-feedback"><?php echo $errors['exercises']; ?></div>
+                <?php endif; ?>
                 <div id="exercises-container">
                     <?php foreach ($data['exercises'] as $index => $exercise): 
                         $selectedExercise = $selectedExercises[$index] ?? null;
@@ -189,7 +245,7 @@ unset($_SESSION['exercise_errors']);
                 </div>
 
                 <button type="button" class="btn add-exercise-btn" id="add-exercise">
-                    Přidat další cvik
+                    <i class="fas fa-plus"></i> Přidat další cvik
                 </button>
             </div>
 
@@ -204,8 +260,12 @@ unset($_SESSION['exercise_errors']);
 
             <!-- Tlačítka -->
             <div class="btn-group">
-                <a href="index.php?page=exercises" class="btn btn-secondary">Zrušit</a>
-                <button type="submit" class="btn btn-primary">Uložit změny</button>
+                <a href="index.php?page=exercises" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Zrušit
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Uložit změny
+                </button>
             </div>
         </form>
     </div>

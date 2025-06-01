@@ -179,13 +179,11 @@ unset($_SESSION['exercise_errors']);
                             </div>
                         </div>
                     </div>
-                    <?php endforeach; ?>
-                </div>
 
-                <button type="button" class="btn add-exercise-btn" id="add-exercise">
-                    Přidat další cvik
-                </button>
-            </div>
+                    <button type="button" class="btn btn-success mb-4" id="add-exercise">
+                        <i class="fas fa-plus-circle me-2"></i>Přidat další cvik
+                    </button>
+                </div>
 
             <!-- Poznámky -->
             <div class="form-group">

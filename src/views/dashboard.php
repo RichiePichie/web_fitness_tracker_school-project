@@ -95,12 +95,7 @@ $goalModel->checkGoalStatus($userId);
                                 <i class="fas fa-<?php echo $icon; ?>"></i>
                             </div>
                             <div class="exercise-info">
-                                <h4><?php echo htmlspecialchars($exercise['title'] ?? 'N/A'); ?></h4>
-                                <p class="exercise-date"><?php echo date('d.m.Y', strtotime($exercise['date'])); ?></p>
-                                <p>
-                                    <span class="exercise-duration"><?php echo htmlspecialchars($exercise['duration'] ?? 'N/A'); ?> min</span>
-                                    <span class="exercise-calories"><?php echo htmlspecialchars($exercise['calories_burned'] ?? 'N/A'); ?> kcal</span>
-                                </p>
+                                <h4><?php echo date('d.m.Y', strtotime($exercise['date'])); ?></h4>
                             </div>
                         </div>
                     <?php endforeach; ?>

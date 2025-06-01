@@ -100,24 +100,54 @@ class Exercise {
 
     // Aktualizace tréninkové jednotky
     public function updateTrainingSession($id, $data) {
-        $setFields = [];
-        $params = [':id' => $id];
-        
-        foreach ($data as $key => $value) {
-            if ($key !== 'id' && $key !== 'user_id') {
-                $setFields[] = "$key = :$key";
-                $params[":$key"] = $value;
-            }
-        }
-        
-        $setClause = implode(', ', $setFields);
-        $sql = "UPDATE training_sessions SET $setClause WHERE id = :id";
-        
         try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
+            $this->beginTransaction();
+            
+            // 1. Aktualizace základních údajů tréninkové jednotky
+            $setFields = [];
+            $params = [':id' => $id];
+            
+            foreach ($data as $key => $value) {
+                if ($key !== 'id' && $key !== 'user_id' && $key !== 'exercises') {
+                    $setFields[] = "$key = :$key";
+                    $params[":$key"] = $value;
+                }
+            }
+            
+            if (!empty($setFields)) {
+                $setClause = implode(', ', $setFields);
+                $sql = "UPDATE training_sessions SET $setClause WHERE id = :id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute($params);
+            }
+            
+            // 2. Aktualizace cviků
+            if (isset($data['exercises'])) {
+                // Nejprve smažeme všechny existující cviky pro tuto tréninkovou jednotku
+                $deleteSql = "DELETE FROM training_exercise_entries WHERE training_session_id = :id";
+                $stmt = $this->pdo->prepare($deleteSql);
+                $stmt->execute([':id' => $id]);
+                
+                // Pak přidáme nové cviky
+                foreach ($data['exercises'] as $exercise) {
+                    if (!empty($exercise['exercise_id'])) {
+                        $this->addExerciseToSession(
+                            $id,
+                            $exercise['exercise_id'],
+                            $exercise['sets'] ?? null,
+                            $exercise['reps'] ?? null,
+                            $exercise['weight'] ?? null,
+                            $exercise['distance'] ?? null
+                        );
+                    }
+                }
+            }
+            
+            $this->commitTransaction();
             return true;
+            
         } catch (PDOException $e) {
+            $this->rollbackTransaction();
             error_log("Chyba při aktualizaci tréninkové jednotky: " . $e->getMessage());
             return false;
         }

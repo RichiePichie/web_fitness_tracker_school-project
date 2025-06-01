@@ -15,7 +15,6 @@ class ExerciseController {
         
         $userId = $_SESSION['user_id'];
         $exercises = $this->exerciseModel->getAllTrainingSessionsByUser($userId);
-        $exerciseModel = $this->exerciseModel;
         include __DIR__ . '/../views/exercises.php';
     }
     
@@ -138,10 +137,10 @@ class ExerciseController {
             header('Location: index.php?page=login');
             exit;
         }
-        
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userId = $_SESSION['user_id'];
-            $exerciseId = $_POST['id'] ?? 0;
+            $exerciseId = $_GET['id'] ?? 0;
             
             $exercise = $this->exerciseModel->getTrainingSessionById($exerciseId);
             
@@ -161,21 +160,21 @@ class ExerciseController {
             
             // Validace vstupu
             if (empty($title)) {
-                $errors['title'] = 'Název cvičení je povinný';
+                $errors['title'] = 'Nazev cviceni je povinny';
             }
             
             if (empty($exerciseType)) {
-                $errors['exercise_type'] = 'Typ cvičení je povinný';
+                $errors['exercise_type'] = 'Typ cviceni je povinny';
             }
             
             if ($duration <= 0) {
-                $errors['duration'] = 'Doba trvání musí být větší než 0';
+                $errors['duration'] = 'Doba trvani musi byt vetsi nez 0';
             }
             
             if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-                $errors['date'] = 'Neplatné datum';
+                $errors['date'] = 'Neplatne datum';
             }
-            
+
             if (empty($errors)) {
                 $data = [
                     'title' => $title,
@@ -193,11 +192,11 @@ class ExerciseController {
                     header('Location: index.php?page=exercises');
                     exit;
                 } else {
-                    $errors['general'] = 'Nastala chyba při aktualizaci cvičení';
+                    $errors['general'] = 'Nastala chyba pri aktualizaci cviceni';
                 }
             }
             
-            // Pokud došlo k chybě, uložíme chyby do session
+            // Pokud doslo k chybe, ulozime chyby do session
             $_SESSION['exercise_errors'] = $errors;
             header('Location: index.php?page=edit_exercise&id=' . $exerciseId);
             exit;
@@ -336,16 +335,20 @@ class ExerciseController {
             $date = $_POST['date'] ?? '';
             $notes = $_POST['notes'] ?? '';
             $exercises = $_POST['exercises'] ?? [];
-            
+
+            // Debug: Vypis prijatych dat
+            error_log('Data z formulare: ' . print_r(["user_id" => $userId, "date" => $date, "notes" => $notes, "exercises" => $exercises], true));
+
             $errors = [];
             
             // Validace vstupu
             if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 $errors['date'] = 'Neplatné datum';
             }
-            
+
             if (empty($exercises)) {
-                $errors['exercises'] = 'Musíte přidat alespoň jeden cvik';
+                $errors['exercises'] = 'Musite pridat alespoň jeden cvik';
+                error_log('Chyba: zadne cviky nebyly zadany');
             }
             
             // Validace cviků
@@ -377,10 +380,10 @@ class ExerciseController {
                     
                     // Vytvoření tréninkové jednotky
                     $trainingSessionId = $this->exerciseModel->createTrainingSession(
-                        $userId,
-                        $date,
-                        null, // total_duration - můžeme později spočítat
-                        null, // total_calories_burned - můžeme později spočítat
+                        $userId, 
+                        $date, 
+                        null, // total_duration
+                        null, // total_calories_burned
                         $notes
                     );
                     
@@ -427,7 +430,9 @@ class ExerciseController {
             $_SESSION['exercise_data'] = [
                 'date' => $date,
                 'notes' => $notes,
-                'exercises' => $exercises
+                'exercises' => $exercises,
+                'duration' => $duration,
+                'calories_burned' => $caloriesBurned
             ];
             
             header('Location: index.php?page=add_exercise');
