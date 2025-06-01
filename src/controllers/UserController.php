@@ -119,7 +119,6 @@ class UserController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
-            $remember = isset($_POST['remember']) ? true : false;
             
             $errors = [];
             
@@ -153,26 +152,6 @@ class UserController {
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['user_type'] = $user['user_type'];
                     
-                    /* Pokud uživatel zaškrtl "Zapamatovat si mě" (Kdyžtak dodělat)
-                    if ($remember) {
-                        // Vytvoření bezpečného tokenu
-                        $token = bin2hex(random_bytes(32));
-                        $expires = time() + (30 * 24 * 60 * 60); // 30 dní
-                        
-                        // Uložení tokenu do databáze (předpokládá existenci tabulky remember_tokens)
-                        $sql = "INSERT INTO remember_tokens (user_id, token, expires_at) 
-                                VALUES (:user_id, :token, :expires)";
-                        $stmt = $this->pdo->prepare($sql);
-                        $stmt->execute([
-                            ':user_id' => $user['id'],
-                            ':token' => $token,
-                            ':expires' => date('Y-m-d H:i:s', $expires)
-                        ]);
-                        
-                        // Nastavení cookie
-                        setcookie('remember_token', $token, $expires, '/', '', true, true);
-                    }*/
-                    
                     header('Location: index.php?page=dashboard');
                     exit;
                 } else {
@@ -192,10 +171,7 @@ class UserController {
             } else {
                 // Uložení chyb a dat do session
                 $_SESSION['login_errors'] = $errors;
-                $_SESSION['login_form_data'] = [
-                    'email' => $email,
-                    'remember' => $remember
-                ];
+                $_SESSION['login_form_data'] = $email;
                 
                 header('Location: index.php?page=login');
                 exit;
