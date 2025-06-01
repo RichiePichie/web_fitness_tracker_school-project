@@ -39,11 +39,11 @@ unset($_SESSION['register_errors']);
                 <h3>Osobní informace</h3>
                 <div class="form-group">
                     <label for="height">Výška (cm)</label>
-                    <input type="number" step="0.01" name="height" id="height" value="<?= htmlspecialchars($user['height'] ?? '') ?>">
+                    <input type="number" step="0.01" name="height" id="height" value="<?= htmlspecialchars($user['height'] ?? '') ?>" min="0">
                 </div>
                 <div class="form-group">
                     <label for="weight">Váha (kg)</label>
-                    <input type="number" step="0.01" name="weight" id="weight"
+                    <input type="number" step="0.01" name="weight" id="weight" min="0"
                            value="<?= htmlspecialchars($user['weight'] ?? '') ?>">
                 </div>
                 <div class="form-group">

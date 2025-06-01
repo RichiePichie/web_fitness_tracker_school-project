@@ -43,7 +43,7 @@ unset($_SESSION['exercise_errors']);
 
         <div class="mb-3">
             <label for="duration" class="form-label">Doba trvání (minuty) *</label>
-            <input type="number" class="form-control <?php echo isset($errors['duration']) ? 'is-invalid' : ''; ?>"
+            <input type="number" class="form-control <?php echo isset($errors['duration']) ? 'is-invalid' : ''; ?>" min="0"
                    id="duration" name="duration" value="<?php echo htmlspecialchars($exercise['duration']); ?>" required min="1">
             <?php if (isset($errors['duration'])): ?>
                 <div class="invalid-feedback"><?php echo $errors['duration']; ?></div>
@@ -52,7 +52,7 @@ unset($_SESSION['exercise_errors']);
 
         <div class="mb-3">
             <label for="calories_burned" class="form-label">Spálené kalorie</label>
-            <input type="number" class="form-control" id="calories_burned" name="calories_burned"
+            <input type="number" class="form-control" id="calories_burned" name="calories_burned" min="0"
                    value="<?php echo htmlspecialchars($exercise['calories_burned']); ?>" min="0">
         </div>
 

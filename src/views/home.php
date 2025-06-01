@@ -126,7 +126,7 @@ include 'src/views/header.php';
             </div>
             <p class="testimonial-text">Stanovení cílů a jejich sledování mě motivuje k lepším výkonům. Aplikace je jednoduchá a přehledná, přesně to jsem hledala.</p>
             <div class="testimonial-author">
-                <img class="testimonial-avatar" src="public/images/Petra_svobodova.jpg" alt="Avatar">
+                <img class="testimonial-avatar" src="public/images/Petra_Svobodova.png" alt="Avatar">
                 <div class="testimonial-info">
                     <h4>Petra Svobodová</h4>
                     <p>Aktivní uživatelka, 6 měsíců</p>
