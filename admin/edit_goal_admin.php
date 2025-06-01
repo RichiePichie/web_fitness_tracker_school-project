@@ -122,6 +122,12 @@ try {
                             </a>
                         </li>
                         <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="manage_goals.php" class="active">
                                 <i class="fas fa-bullseye"></i>
                                 <span>Goals</span>

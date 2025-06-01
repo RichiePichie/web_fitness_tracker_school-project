@@ -3,52 +3,41 @@ require_once 'auth_check.php'; // Ensures admin is logged in
 require_once '../config.php';   // Contains PDO connection
 
 $pageTitle = "Activity Details - Admin Panel";
-$session_id = $_GET['id'] ?? null;
-$session_details = null;
-$exercise_entries = [];
+$activity = null;
+$exercises = [];
 $error_message = '';
 
-if (!$session_id || !filter_var($session_id, FILTER_VALIDATE_INT)) {
-    $_SESSION['activity_management_error'] = 'Invalid activity ID.';
-    header('Location: activities.php');
-    exit;
-}
+if (isset($_GET['id'])) {
+    try {
+        // Get activity details
+        $stmt = $pdo->prepare("
+            SELECT ts.*, u.username 
+            FROM training_sessions ts
+            JOIN users u ON ts.user_id = u.id
+            WHERE ts.id = ?
+        ");
+        $stmt->execute([$_GET['id']]);
+        $activity = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch session details
-try {
-    $stmt_session = $pdo->prepare(
-        "SELECT ts.*, u.username 
-         FROM training_sessions ts
-         JOIN users u ON ts.user_id = u.id
-         WHERE ts.id = :id"
-    );
-    $stmt_session->bindParam(':id', $session_id, PDO::PARAM_INT);
-    $stmt_session->execute();
-    $session_details = $stmt_session->fetch(PDO::FETCH_ASSOC);
+        if (!$activity) {
+            $_SESSION['activity_management_error'] = "Activity not found.";
+            header("Location: activities.php");
+            exit;
+        }
 
-    if (!$session_details) {
-        $_SESSION['activity_management_error'] = 'Activity session not found.';
-        header('Location: activities.php');
-        exit;
+        // Get exercises for this activity
+        $stmt = $pdo->prepare("
+            SELECT tee.*, ie.name, ie.exercise_type
+            FROM training_exercise_entries tee
+            JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
+            WHERE tee.training_session_id = ?
+        ");
+        $stmt->execute([$_GET['id']]);
+        $exercises = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $error_message = "Error loading activity details: " . $e->getMessage();
     }
-
-    // Fetch exercise entries for this session
-    $stmt_exercises = $pdo->prepare(
-        "SELECT tee.*, ie.name as exercise_name, ie.exercise_type 
-         FROM training_exercise_entries tee
-         JOIN individual_exercises ie ON tee.individual_exercise_id = ie.id
-         WHERE tee.training_session_id = :session_id
-         ORDER BY tee.id ASC"
-    );
-    $stmt_exercises->bindParam(':session_id', $session_id, PDO::PARAM_INT);
-    $stmt_exercises->execute();
-    $exercise_entries = $stmt_exercises->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    $error_message = "Error fetching activity details: " . $e->getMessage();
-    // Log this error
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,118 +45,209 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
-        .container { max-width: 900px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        header { background-color: #333; color: #fff; padding: 1em 0; text-align: center; }
-        header h1 { margin: 0; }
-        nav ul { list-style-type: none; padding: 0; text-align: center; background-color: #444; margin-bottom: 20px; }
-        nav ul li { display: inline; }
-        nav ul li a { display: inline-block; padding: 10px 20px; color: #fff; text-decoration: none; }
-        nav ul li a:hover { background-color: #555; }
-        .content { padding: 20px; }
-        .content h2, .content h3 { color: #333; margin-bottom: 15px; }
-        .details-section, .exercises-section { margin-bottom: 30px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #fdfdfd; }
-        .details-section p { margin: 5px 0; }
-        .details-section strong { display: inline-block; width: 150px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        table th, table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        table th { background-color: #f0f0f0; }
-        .error-message { color: red; border: 1px solid red; padding: 10px; margin-bottom: 20px; background-color: #ffecec; }
-        .back-link { display: inline-block; margin-bottom:20px; color: #337ab7; text-decoration:none; }
-        .back-link:hover { text-decoration:underline; }
-        footer { text-align: center; padding: 20px; background-color: #333; color: #fff; margin-top: 30px;}
-    </style>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <link rel="stylesheet" href="../public/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body>
-    <header>
-        <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
-    </header>
+<body class="admin-body">
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-logo">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>Fitness Admin</span>
+                </h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3 class="nav-title">Navigation</h3>
+                    <ul>
+                        <li>
+                            <a href="index.php">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="users.php">
+                                <i class="fas fa-users"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="activities.php" class="active">
+                                <i class="fas fa-running"></i>
+                                <span>Activities</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="manage_goals.php">
+                                <i class="fas fa-bullseye"></i>
+                                <span>Goals</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="logout.php" class="logout-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
 
-    <nav>
-        <ul>
-            <li><a href="../index.php" target="_blank">View Main Site</a></li>
-            <li><a href="index.php">Dashboard</a></li>
-            <li><a href="users.php">Manage Users</a></li>
-            <li><a href="activities.php">Manage Activities</a></li>
-            <li><a href="settings.php">Settings</a></li>
-            <li><a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['admin_username']); ?>)</a></li>
-        </ul>
-    </nav>
-
-    <div class="container">
-        <div class="content">
-            <a href="activities.php" class="back-link">&laquo; Back to Activities List</a>
-            <h2>Activity Session Details</h2>
-
-            <?php if ($error_message): ?>
-                <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
-            <?php endif; ?>
-
-            <?php if ($session_details && !$error_message): ?>
-                <div class="details-section">
-                    <h3>Session Information</h3>
-                    <div style="margin-bottom: 15px;">
-                        <a href="edit_activity.php?id=<?php echo $session_details['id']; ?>" 
-                           style="background-color: #5bc0de; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px; font-size: 0.9em; margin-right: 10px;">Edit This Activity</a>
-                        <a href="delete_activity.php?id=<?php echo $session_details['id']; ?>" 
-                           onclick="return confirm('Are you sure you want to delete this activity session and all its entries? This action cannot be undone.');" 
-                           style="background-color: #d9534f; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Delete This Activity</a>
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-content">
+                    <h1>Activity Details</h1>
+                    <div class="header-actions">
+                        <a href="edit_activity.php?id=<?php echo $activity['id']; ?>" class="btn btn-warning">
+                            <i class="fas fa-edit"></i>
+                            Edit Activity
+                        </a>
+                        <button class="btn btn-danger" onclick="confirmDelete(<?php echo $activity['id']; ?>)">
+                            <i class="fas fa-trash-alt"></i>
+                            Delete Activity
+                        </button>
                     </div>
-                    <p><strong>Session ID:</strong> <?php echo htmlspecialchars($session_details['id']); ?></p>
-                    <p><strong>User:</strong> <?php echo htmlspecialchars($session_details['username']); ?> (ID: <?php echo htmlspecialchars($session_details['user_id']); ?>)</p>
-                    <p><strong>Date:</strong> <?php echo htmlspecialchars($session_details['date']); ?></p>
-                    <p><strong>Start Time:</strong> <?php echo htmlspecialchars($session_details['start_at']); ?></p>
-                    <p><strong>End Time:</strong> <?php echo htmlspecialchars($session_details['end_at'] ?? 'N/A'); ?></p>
-                    <p><strong>Total Duration:</strong> <?php echo htmlspecialchars($session_details['total_duration'] ?? 'N/A'); ?> minutes</p>
-                    <p><strong>Calories Burned:</strong> <?php echo htmlspecialchars($session_details['total_calories_burned'] ?? 'N/A'); ?></p>
-                    <p><strong>Notes:</strong></p>
-                    <p><?php echo nl2br(htmlspecialchars($session_details['notes'] ?? 'N/A')); ?></p>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <?php if ($error_message): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="content-grid">
+                    <!-- Activity Overview -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2>Session Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>User:</label>
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            <?php echo strtoupper(substr($activity['username'], 0, 1)); ?>
+                                        </div>
+                                        <div class="user-details">
+                                            <span class="user-name"><?php echo htmlspecialchars($activity['username']); ?></span>
+                                            <span class="user-meta">ID: <?php echo htmlspecialchars($activity['user_id']); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <label>Date:</label>
+                                    <span><?php echo date('F j, Y', strtotime($activity['date'])); ?></span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Start Time:</label>
+                                    <span><?php echo date('H:i', strtotime($activity['start_at'])); ?></span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Duration:</label>
+                                    <span class="duration-badge">
+                                        <i class="fas fa-clock"></i>
+                                        <?php echo htmlspecialchars($activity['total_duration']); ?> minutes
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Calories Burned:</label>
+                                    <span class="calories-badge">
+                                        <i class="fas fa-fire"></i>
+                                        <?php echo htmlspecialchars($activity['total_calories_burned']); ?> kcal
+                                    </span>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>Notes:</label>
+                                    <p class="notes"><?php echo nl2br(htmlspecialchars($activity['notes'] ?? 'No notes')); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exercises List -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2>Exercises Performed</h2>
+                        </div>
+                        <div class="card-body">
+                            <?php if (empty($exercises)): ?>
+                                <div class="empty-state">
+                                    <i class="fas fa-dumbbell"></i>
+                                    <p>No exercises recorded for this session</p>
+                                </div>
+                            <?php else: ?>
+                                <div class="table-responsive">
+                                    <table class="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Exercise</th>
+                                                <th>Type</th>
+                                                <th>Sets</th>
+                                                <th>Reps</th>
+                                                <th>Weight (kg)</th>
+                                                <th>Duration (min)</th>
+                                                <th>Distance (km)</th>
+                                                <th>Calories</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($exercises as $exercise): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($exercise['name']); ?></td>
+                                                    <td>
+                                                        <span class="badge badge-primary">
+                                                            <?php echo htmlspecialchars(ucfirst($exercise['exercise_type'])); ?>
+                                                        </span>
+                                                    </td>
+                                                    <td><?php echo $exercise['sets'] ?? '-'; ?></td>
+                                                    <td><?php echo $exercise['reps'] ?? '-'; ?></td>
+                                                    <td><?php echo $exercise['weight'] ? number_format($exercise['weight'], 2) : '-'; ?></td>
+                                                    <td><?php echo $exercise['duration'] ?? '-'; ?></td>
+                                                    <td><?php echo $exercise['distance'] ? number_format($exercise['distance'], 2) : '-'; ?></td>
+                                                    <td><?php echo $exercise['calories_burned'] ?? '-'; ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="exercises-section">
-                    <h3>Exercises Performed</h3>
-                    <?php if (!empty($exercise_entries)): ?>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Exercise Name</th>
-                                    <th>Type</th>
-                                    <th>Sets</th>
-                                    <th>Reps</th>
-                                    <th>Weight (kg)</th>
-                                    <th>Duration (min)</th>
-                                    <th>Distance (km)</th>
-                                    <th>Calories Burned</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($exercise_entries as $entry): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($entry['exercise_name']); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['exercise_type']); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['sets'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['reps'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['weight'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['duration'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['distance'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($entry['calories_burned'] ?? 'N/A'); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <p>No specific exercises logged for this session.</p>
-                    <?php endif; ?>
+                <div class="form-actions">
+                    <a href="activities.php" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Activities
+                    </a>
                 </div>
-            <?php elseif (!$error_message): ?>
-                <p>Activity session data could not be loaded.</p>
-            <?php endif; ?>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <footer>
-        <p>&copy; <?php echo date("Y"); ?> Fitness Tracker Admin Panel</p>
-    </footer>
+    <script>
+        function confirmDelete(id) {
+            if (confirm('Are you sure you want to delete this activity session and all its entries? This action cannot be undone.')) {
+                window.location.href = 'delete_activity.php?id=' + id;
+            }
+        }
+    </script>
 </body>
 </html>

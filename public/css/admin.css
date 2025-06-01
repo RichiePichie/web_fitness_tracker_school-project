@@ -6,6 +6,7 @@
     --warning-light: rgba(245, 158, 11, 0.1);
     --info-light: rgba(112, 70, 229, 0.1);
     --danger-light: rgba(239, 68, 68, 0.1);
+    --danger-dark: #dc2626;
     
     /* Sidebar */
     --sidebar-width: 260px;
@@ -144,6 +145,7 @@
     flex-grow: 1;
     margin-left: var(--sidebar-width);
     min-height: 100vh;
+    padding-top: 0;
 }
 
 /* Header Styles */
@@ -716,11 +718,28 @@
 }
 
 .btn-danger {
-    color: var(--danger-color);
+    background-color: var(--danger-color) !important;
+    border-color: var(--danger-color) !important;
+    color: white !important;
 }
 
 .btn-danger:hover {
-    background-color: var(--danger-light);
+    background-color: var(--danger-dark) !important;
+    border-color: var(--danger-dark) !important;
+    color: white !important;
+}
+
+/* Additional styles for icon buttons with danger class */
+.btn-icon.btn-danger {
+    background-color: var(--danger-color) !important;
+    border-color: var(--danger-color) !important;
+    color: white !important;
+}
+
+.btn-icon.btn-danger:hover {
+    background-color: var(--danger-dark) !important;
+    border-color: var(--danger-dark) !important;
+    color: white !important;
 }
 
 /* Button Styles */

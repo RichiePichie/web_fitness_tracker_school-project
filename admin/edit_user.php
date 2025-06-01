@@ -29,24 +29,38 @@ if (!$isNewUser) {
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        if ($isNewUser) {
+        // Check if email already exists
+        $checkEmailStmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+        $checkEmailStmt->execute([$_POST['email'], $isNewUser ? 0 : $_GET['id']]);
+        if ($checkEmailStmt->fetch()) {
+            $error_message = "A user with this email address already exists.";
+        } else if ($isNewUser) {
             // Validate required password for new users
             if (empty($_POST['password'])) {
                 $error_message = "Password is required for new users.";
             } else {
                 // Create new user with password hash
                 $stmt = $pdo->prepare("INSERT INTO users (username, email, user_type, gender, height, weight, date_of_birth, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([
-                    $_POST['username'],
-                    $_POST['email'],
-                    $_POST['user_type'],
-                    $_POST['gender'],
-                    !empty($_POST['height']) ? $_POST['height'] : null,
-                    !empty($_POST['weight']) ? $_POST['weight'] : null,
-                    !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null,
-                    password_hash($_POST['password'], PASSWORD_DEFAULT)
-                ]);
-                $success_message = "User created successfully!";
+                try {
+                    $stmt->execute([
+                        $_POST['username'],
+                        $_POST['email'],
+                        $_POST['user_type'],
+                        $_POST['gender'],
+                        !empty($_POST['height']) ? $_POST['height'] : null,
+                        !empty($_POST['weight']) ? $_POST['weight'] : null,
+                        !empty($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null,
+                        password_hash($_POST['password'], PASSWORD_DEFAULT)
+                    ]);
+                    $success_message = "User created successfully!";
+                } catch (PDOException $e) {
+                    // Check for username duplicate if that's the issue
+                    if (strpos($e->getMessage(), 'Duplicate entry') !== false && strpos($e->getMessage(), 'username') !== false) {
+                        $error_message = "This username is already taken.";
+                    } else {
+                        throw $e;
+                    }
+                }
             }
         } else {
             // Update existing user
@@ -69,10 +83,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    implode(", ", array_map(fn($field) => "$field = ?", array_keys($updateFields))) .
                    " WHERE id = ?";
             
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([...array_values($updateFields), $_GET['id']]);
-            
-            $success_message = "User updated successfully!";
+            try {
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([...array_values($updateFields), $_GET['id']]);
+                $success_message = "User updated successfully!";
+            } catch (PDOException $e) {
+                // Check for username duplicate
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false && strpos($e->getMessage(), 'username') !== false) {
+                    $error_message = "This username is already taken.";
+                } else {
+                    throw $e;
+                }
+            }
         }
         
         if (empty($error_message)) {
@@ -82,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     } catch (PDOException $e) {
-        $error_message = "Error saving user: " . $e->getMessage();
+        $error_message = "An error occurred while saving the user. Please try again.";
     }
 }
 
@@ -142,6 +164,12 @@ if (isset($_SESSION['edit_user_success'])) {
                             <a href="activities.php">
                                 <i class="fas fa-running"></i>
                                 <span>Activities</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
                             </a>
                         </li>
                         <li>

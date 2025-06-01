@@ -58,10 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($isNewActivity) {
             // Create new activity
-            $stmt = $pdo->prepare("INSERT INTO training_sessions (user_id, date, total_calories_burned, notes, start_at) VALUES (?, ?, ?, ?, NOW())");
+            $stmt = $pdo->prepare("INSERT INTO training_sessions (user_id, date, total_duration, total_calories_burned, notes, start_at) VALUES (?, ?, ?, ?, ?, NOW())");
             $stmt->execute([
                 $_POST['user_id'],
                 $_POST['date'],
+                $_POST['total_duration'],
                 $_POST['total_calories_burned'],
                 $_POST['notes']
             ]);
@@ -69,10 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success_message = "Activity created successfully!";
         } else {
             // Update existing activity
-            $stmt = $pdo->prepare("UPDATE training_sessions SET user_id = ?, date = ?, total_calories_burned = ?, notes = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE training_sessions SET user_id = ?, date = ?, total_duration = ?, total_calories_burned = ?, notes = ? WHERE id = ?");
             $stmt->execute([
                 $_POST['user_id'],
                 $_POST['date'],
+                $_POST['total_duration'],
                 $_POST['total_calories_burned'],
                 $_POST['notes'],
                 $_GET['id']
@@ -88,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['exercises']) && is_array($_POST['exercises'])) {
             $stmt = $pdo->prepare("
                 INSERT INTO training_exercise_entries 
-                (training_session_id, individual_exercise_id, sets, reps, weight, distance) 
-                VALUES (?, ?, ?, ?, ?, ?)
+                (training_session_id, individual_exercise_id, sets, reps, weight, duration, distance, calories_burned) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             foreach ($_POST['exercises'] as $exercise) {
@@ -101,7 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $exercise['sets'] ?? null,
                     $exercise['reps'] ?? null,
                     $exercise['weight'] ?? null,
-                    $exercise['distance'] ?? null
+                    $exercise['duration'] ?? null,
+                    $exercise['distance'] ?? null,
+                    $exercise['calories_burned'] ?? null
                 ]);
             }
         }
@@ -161,6 +165,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </a>
                         </li>
                         <li>
+                            <a href="exercises.php">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercises</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="manage_goals.php">
                                 <i class="fas fa-bullseye"></i>
                                 <span>Goals</span>
@@ -213,6 +223,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="form-group">
+                            <label for="total_duration">Duration (minutes):</label>
+                            <input type="number" id="total_duration" name="total_duration" value="<?php echo htmlspecialchars($activity['total_duration'] ?? ''); ?>" required min="1">
+                        </div>
+
+                        <div class="form-group">
                             <label for="total_calories_burned">Calories Burned:</label>
                             <input type="number" id="total_calories_burned" name="total_calories_burned" value="<?php echo htmlspecialchars($activity['total_calories_burned'] ?? ''); ?>" required min="0">
                         </div>
@@ -243,7 +258,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <div class="sets-reps-weight" style="display: <?php echo in_array($exercise['subtype'], ['RepsSetsWeight', 'Reps']) ? 'flex' : 'none'; ?>">
                                                     <input type="number" name="exercises[<?php echo $index; ?>][sets]" placeholder="Sets" value="<?php echo htmlspecialchars($exercise['sets'] ?? ''); ?>" min="1">
                                                     <input type="number" name="exercises[<?php echo $index; ?>][reps]" placeholder="Reps" value="<?php echo htmlspecialchars($exercise['reps'] ?? ''); ?>" min="1">
-                                                    <input type="number" name="exercises[<?php echo $index; ?>][weight]" placeholder="Weight (kg)" value="<?php echo htmlspecialchars($exercise['weight'] ?? ''); ?>" step="0.1" min="0">
+                                                    <?php if ($exercise['subtype'] === 'RepsSetsWeight'): ?>
+                                                        <input type="number" name="exercises[<?php echo $index; ?>][weight]" placeholder="Weight (kg)" value="<?php echo htmlspecialchars($exercise['weight'] ?? ''); ?>" step="0.1" min="0">
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="duration-distance" style="display: <?php echo $exercise['subtype'] === 'Distance' ? 'flex' : 'none'; ?>">
                                                     <input type="number" name="exercises[<?php echo $index; ?>][distance]" placeholder="Distance (km)" value="<?php echo htmlspecialchars($exercise['distance'] ?? ''); ?>" step="0.01" min="0">
@@ -290,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="sets-reps-weight" style="display: none">
                     <input type="number" name="exercises[INDEX][sets]" placeholder="Sets" min="1">
                     <input type="number" name="exercises[INDEX][reps]" placeholder="Reps" min="1">
-                    <input type="number" name="exercises[INDEX][weight]" placeholder="Weight (kg)" step="0.1" min="0">
+                    <input type="number" name="exercises[INDEX][weight]" placeholder="Weight (kg)" step="0.1" min="0" class="weight-input">
                 </div>
                 <div class="duration-distance" style="display: none">
                     <input type="number" name="exercises[INDEX][distance]" placeholder="Distance (km)" step="0.01" min="0">
@@ -316,9 +333,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 const setsRepsWeight = entry.querySelector('.sets-reps-weight');
                 const durationDistance = entry.querySelector('.duration-distance');
+                const weightInput = entry.querySelector('.weight-input');
                 
                 setsRepsWeight.style.display = ['RepsSetsWeight', 'Reps'].includes(subtype) ? 'flex' : 'none';
                 durationDistance.style.display = subtype === 'Distance' ? 'flex' : 'none';
+                
+                if (weightInput) {
+                    weightInput.style.display = subtype === 'RepsSetsWeight' ? 'block' : 'none';
+                }
             }
 
             function addExercise() {
