@@ -344,7 +344,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             function addExercise(event) {
-                event.preventDefault();
+                console.log('addExercise function called. Event:', event);
+                if (event && typeof event.preventDefault === 'function') {
+                    console.log('Calling event.preventDefault()');
+                    event.preventDefault();
+                } else if (event) {
+                    console.warn('event.preventDefault is not a function on event:', event);
+                }
+                if (event && typeof event.stopPropagation === 'function') {
+                    console.log('Calling event.stopPropagation()');
+                    event.stopPropagation();
+                } else if (event) {
+                    console.warn('event.stopPropagation is not a function on event:', event);
+                }
                 const clone = template.content.cloneNode(true);
                 const newEntry = clone.querySelector('.exercise-entry');
                 
@@ -366,7 +378,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Add event listener to add button
-            addButton.addEventListener('click', addExercise);
+            if (addButton) {
+                addButton.addEventListener('click', function(event_object) { 
+                    console.log('Add Exercise button clicked. Event:', event_object);
+                    if (typeof addExercise === 'function') {
+                        addExercise(event_object); 
+                    } else {
+                        console.error('addExercise function is not defined!');
+                    }
+                });
+            } else {
+                console.error('Add Exercise button not found!');
+            }
 
             // Add event listeners to existing exercise selects
             document.querySelectorAll('.exercise-select').forEach(select => {
@@ -381,8 +404,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
 
             // Add at least one exercise entry if none exist
-            if (exerciseCount === 0) {
-                addExercise();
+            if (exerciseCount === 0 && container) {
+                console.log('Initial call to addExercise (no event).');
+                addExercise(); 
             }
         });
     </script>
