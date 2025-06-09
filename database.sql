@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS individual_exercises (
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
     exercise_type ENUM('cardio', 'strength', 'flexibility', 'balance', 'other') NOT NULL,
-    subtype ENUM('Distance', 'RepsSetsWeight', 'Reps') NOT NULL,
+    subtype ENUM('Distance', 'RepsSetsWeight', 'Reps') NOT NULL
 );
 
 -- Tabulka tréninkových jednotek (konkrétní trénink)
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS user_goals (
     status ENUM('active', 'completed', 'failed', 'cancelled') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Přidání cvičení do tabulky individual_exercises
