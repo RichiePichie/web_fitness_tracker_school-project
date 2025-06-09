@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS individual_exercises (
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
     exercise_type ENUM('cardio', 'strength', 'flexibility', 'balance', 'other') NOT NULL,
-    subtype ENUM('Distance', 'RepsSetsWeight', 'Reps') NOT NULL
+    subtype ENUM('Distance', 'RepsSetsWeight', 'Reps', 'Time', 'None') NOT NULL DEFAULT 'None'
 );
 
 -- Tabulka tréninkových jednotek (konkrétní trénink)
@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS training_exercise_entries (
     reps INT DEFAULT 0,
     weight DECIMAL(5,2) DEFAULT 0,
     distance DECIMAL(10,2) DEFAULT 0,
+    time TIME DEFAULT NULL,
     FOREIGN KEY (training_session_id) REFERENCES training_sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (individual_exercise_id) REFERENCES individual_exercises(id) ON DELETE CASCADE
 );
@@ -70,44 +71,42 @@ CREATE TABLE IF NOT EXISTS user_goals (
 );
 
 -- Přidání cvičení do tabulky individual_exercises
-INSERT INTO individual_exercises (name, description, exercise_type) VALUES
-('Běh', 'Běh venku nebo na běžeckém pásu', 'cardio'),
-('Jízda na kole', 'Cyklistika venku nebo na trenažeru', 'cardio'),
-('Plavání', 'Plavání v bazénu nebo přírodním vodním zdroji', 'cardio'),
-('Veslování', 'Cvičení na veslovacím trenažeru', 'cardio'),
-('Skákání přes švihadlo', 'Kardio cvičení se švihadlem', 'cardio'),
+INSERT INTO individual_exercises (name, description, exercise_type, subtype) VALUES
+('Běh', 'Běh venku nebo na běžeckém pásu', 'cardio', 'Distance'),
+('Jízda na kole', 'Cyklistika venku nebo na trenažeru', 'cardio', 'Distance'),
+('Plavání', 'Plavání v bazénu nebo přírodním vodním zdroji', 'cardio', 'Distance'),
+('Veslování', 'Cvičení na veslovacím trenažeru', 'cardio', 'Distance'),
+('Skákání přes švihadlo', 'Kardio cvičení se švihadlem', 'cardio', 'Time'),
 
 -- Silová cvičení
-('Klik', 'Klasický klik na zemi', 'strength'),
-('Dřep', 'Dřep s vlastní vahou nebo se závažím', 'strength'),
-('Mrtvý tah', 'Komplexní silové cvičení pro celé tělo', 'strength'),
-('Bench press', 'Tlak na lavici s činkou', 'strength'),
-('Přítahy', 'Přítahy na hrazdě nebo s expanderem', 'strength'),
-('Výpady', 'Výpady vpřed nebo vzad', 'strength'),
-('Prkno', 'Statické cvičení na střed těla', 'strength'),
-('Shyby', 'Přítahy na hrazdě nadhmatem', 'strength'),
+('Klik', 'Klasický klik na zemi', 'strength', 'RepsSetsWeight'),
+('Dřep', 'Dřep s vlastní vahou nebo se závažím', 'strength', 'RepsSetsWeight'),
+('Mrtvý tah', 'Komplexní silové cvičení pro celé tělo', 'strength', 'RepsSetsWeight'),
+('Bench press', 'Tlak na lavici s činkou', 'strength', 'RepsSetsWeight'),
+('Přítahy', 'Přítahy na hrazdě nebo s expanderem', 'strength', 'RepsSetsWeight'),
+('Výpady', 'Výpady vpřed nebo vzad', 'strength', 'RepsSetsWeight'),
 
 -- Flexibilní cvičení
-('Pozdrav slunci', 'Základní sekvence jógy', 'flexibility'),
-('Most', 'Záklon v leže na zádech', 'flexibility'),
-('Předklon', 'Předklon v sedu nebo ve stoje', 'flexibility'),
-('Kobra', 'Záklon v leže na břiše', 'flexibility'),
-('Motýlek', 'Protahování vnitřních stehen', 'flexibility'),
-('Kočka-kráva', 'Protahování páteře', 'flexibility'),
+('Pozdrav slunci', 'Základní sekvence jógy', 'flexibility', 'Time'),
+('Most', 'Záklon v leže na zádech', 'flexibility', 'Time'),
+('Předklon', 'Předklon v sedu nebo ve stoje', 'flexibility', 'Time'),
+('Kobra', 'Záklon v leže na břiše', 'flexibility', 'Time'),
+('Motýlek', 'Protahování vnitřních stehen', 'flexibility', 'Time'),
+('Kočka-kráva', 'Protahování páteře', 'flexibility', 'Time'),
 
 -- Cvičení na rovnováhu
-('Stoj na jedné noze', 'Cvičení rovnováhy na jedné noze', 'balance'),
-('Bojovník III', 'Jógová pozice pro rovnováhu', 'balance'),
-('Chůze po čáře', 'Chůze po úzké čáře pro trénink rovnováhy', 'balance'),
-('Stoj na špičkách', 'Stoj na špičkách s případným pohybem paží', 'balance'),
-('Bosu balanční cvičení', 'Cvičení na balanční podložce', 'balance'),
+('Stoj na jedné noze', 'Cvičení rovnováhy na jedné noze', 'balance', 'Time'),
+('Bojovník III', 'Jógová pozice pro rovnováhu', 'balance', 'Time'),
+('Chůze po čáře', 'Chůze po úzké čáře pro trénink rovnováhy', 'balance', 'Time'),
+('Stoj na špičkách', 'Stoj na špičkách s případným pohybem paží', 'balance', 'Time'),
+('Bosu balanční cvičení', 'Cvičení na balanční podložce', 'balance', 'Time'),
 
 -- Ostatní cvičení
-('HIIT trénink', 'Vysoce intenzivní intervalový trénink', 'other'),
-('Kruhový trénink', 'Kombinace různých cviků v kruzích', 'other'),
-('Pilates', 'Cvičení zaměřené na střed těla a posturu', 'other'),
-('Tai Chi', 'Pomalé pohybové sekvence pro zdraví a relaxaci', 'other'),
-('Tanec', 'Různé taneční styly jako forma cvičení', 'other');
+('HIIT trénink', 'Vysoce intenzivní intervalový trénink', 'other', 'Time'),
+('Kruhový trénink', 'Kombinace různých cviků v kruzích', 'other', 'Time'),
+('Pilates', 'Cvičení zaměřené na střed těla a posturu', 'other', 'Time'),
+('Tai Chi', 'Pomalé pohybové sekvence pro zdraví a relaxaci', 'other', 'Time'),
+('Tanec', 'Různé taneční styly jako forma cvičení', 'other', 'Time');
 
 INSERT INTO users (username, email, password, user_type, gender, height, weight, date_of_birth) VALUES
 ('FreidY', 'precek.adam@seznam.cz','$2y$10$vd7.6b5KF/i4/OKJJIvnBO3QAsPDjzs25OEuXJcUE9778RtWHKtm.', 'admin', 'male', 188, 82, '2006-10-17');
